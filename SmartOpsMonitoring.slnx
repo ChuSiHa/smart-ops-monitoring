@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SmartOpsMonitoring.Api/SmartOpsMonitoring.Api.csproj" />
+  </Folder>
+</Solution>
