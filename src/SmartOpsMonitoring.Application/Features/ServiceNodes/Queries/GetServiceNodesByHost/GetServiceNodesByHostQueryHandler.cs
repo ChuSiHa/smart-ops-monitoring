@@ -1,0 +1,31 @@
+namespace SmartOpsMonitoring.Application.Features.ServiceNodes.Queries.GetServiceNodesByHost;
+
+/// <summary>
+/// Handles <see cref="GetServiceNodesByHostQuery"/> by retrieving service nodes for a host.
+/// </summary>
+public class GetServiceNodesByHostQueryHandler : IQueryHandler<GetServiceNodesByHostQuery, IEnumerable<ServiceNodeDto>>
+{
+    private readonly IServiceNodeRepository _serviceNodeRepository;
+
+    /// <summary>
+    /// Initialises a new instance of <see cref="GetServiceNodesByHostQueryHandler"/>.
+    /// </summary>
+    /// <param name="serviceNodeRepository">The service node repository.</param>
+    public GetServiceNodesByHostQueryHandler(IServiceNodeRepository serviceNodeRepository)
+    {
+        _serviceNodeRepository = serviceNodeRepository;
+    }
+
+    /// <summary>
+    /// Executes the query and returns service nodes for the specified host.
+    /// </summary>
+    /// <param name="request">The query containing the host identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A collection of <see cref="ServiceNodeDto"/>.</returns>
+    public async Task<IEnumerable<ServiceNodeDto>> Handle(GetServiceNodesByHostQuery request, CancellationToken cancellationToken)
+    {
+        var nodes = await _serviceNodeRepository.GetByHostIdAsync(request.HostId, cancellationToken);
+
+        return nodes.Select(n => n.Adapt<ServiceNodeDto>());
+    }
+}

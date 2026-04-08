@@ -1,0 +1,12 @@
+global using FluentValidation;
+global using Mapster;
+global using MediatR;
+global using Microsoft.Extensions.DependencyInjection;
+global using SmartOpsMonitoring.Application.Common;
+global using SmartOpsMonitoring.Application.Contracts;
+global using SmartOpsMonitoring.Application.DTOs;
+global using SmartOpsMonitoring.Application.DTOs.Auth;
+global using SmartOpsMonitoring.Domain.Entities;
+global using SmartOpsMonitoring.Domain.Enums;
+global using SmartOpsMonitoring.Domain.Events;
+global using SmartOpsMonitoring.Domain.Repositories;
