@@ -5,6 +5,7 @@ import { HostService } from '../../core/services/host.service';
 import { HostDto, HostStatus } from '../../core/models/models';
 
 @Component({
+  standalone: false,
   selector: 'app-hosts',
   templateUrl: './hosts.component.html',
   styleUrls: ['./hosts.component.scss'],

@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { HostStatus, ServiceNodeStatus, AlertSeverity, AlertStatus } from '../../core/models/models';
 
-@Pipe({ name: 'hostStatus' })
+@Pipe({ standalone: false, name: 'hostStatus' })
 export class HostStatusPipe implements PipeTransform {
   transform(value: HostStatus): string {
     switch (value) {
@@ -13,7 +13,7 @@ export class HostStatusPipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'serviceNodeStatus' })
+@Pipe({ standalone: false, name: 'serviceNodeStatus' })
 export class ServiceNodeStatusPipe implements PipeTransform {
   transform(value: ServiceNodeStatus): string {
     switch (value) {
@@ -25,7 +25,7 @@ export class ServiceNodeStatusPipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'alertSeverity' })
+@Pipe({ standalone: false, name: 'alertSeverity' })
 export class AlertSeverityPipe implements PipeTransform {
   transform(value: AlertSeverity): string {
     switch (value) {
@@ -36,7 +36,7 @@ export class AlertSeverityPipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'alertStatus' })
+@Pipe({ standalone: false, name: 'alertStatus' })
 export class AlertStatusPipe implements PipeTransform {
   transform(value: AlertStatus): string {
     switch (value) {

@@ -9,6 +9,7 @@ import { ServiceNodeService } from '../../../core/services/service-node.service'
 import { HostDto, ServiceNodeDto, ServiceNodeStatus } from '../../../core/models/models';
 
 @Component({
+  standalone: false,
   selector: 'app-host-detail',
   templateUrl: './host-detail.component.html',
   styleUrls: ['./host-detail.component.scss'],

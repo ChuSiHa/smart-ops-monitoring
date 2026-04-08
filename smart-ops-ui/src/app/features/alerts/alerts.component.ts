@@ -16,6 +16,7 @@ import {
 } from '../../core/models/models';
 
 @Component({
+  standalone: false,
   selector: 'app-alerts',
   templateUrl: './alerts.component.html',
   styleUrls: ['./alerts.component.scss'],

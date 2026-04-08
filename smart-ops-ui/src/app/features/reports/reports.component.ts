@@ -6,6 +6,7 @@ import { MetricService } from '../../core/services/metric.service';
 import { AlertSeverity, HostStatus } from '../../core/models/models';
 
 @Component({
+  standalone: false,
   selector: 'app-reports',
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],

@@ -9,6 +9,7 @@ import { SignalRService } from '../../core/services/signalr.service';
 import { MetricDto, HostDto } from '../../core/models/models';
 
 @Component({
+  standalone: false,
   selector: 'app-metrics',
   templateUrl: './metrics.component.html',
   styleUrls: ['./metrics.component.scss'],
