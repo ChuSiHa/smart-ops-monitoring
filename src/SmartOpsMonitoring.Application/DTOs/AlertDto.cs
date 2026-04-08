@@ -1,8 +1,8 @@
-using SmartOpsMonitoring.Domain.Enums;
-
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Flat response DTO for an alert.</summary>
+/// <summary>
+/// Flat response DTO for an alert.
+/// </summary>
 public class AlertDto
 {
     /// <summary>Gets or sets the alert identifier.</summary>

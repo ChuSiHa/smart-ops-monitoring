@@ -1,16 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Enums;
-using SmartOpsMonitoring.Domain.Events;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
 
 /// <summary>
 /// Handles <see cref="CreateAlertCommand"/> by persisting an alert and publishing a domain event.
 /// </summary>
-public class CreateAlertCommandHandler : IRequestHandler<CreateAlertCommand, AlertDto>
+public class CreateAlertCommandHandler : ICommandHandler<CreateAlertCommand, AlertDto>
 {
     private readonly IAlertRepository _alertRepository;
     private readonly IPublisher _publisher;
@@ -49,6 +42,7 @@ public class CreateAlertCommandHandler : IRequestHandler<CreateAlertCommand, Ale
 
         await _alertRepository.AddAsync(alert, cancellationToken);
 
+        // Publish domain event so subscribers (e.g. SignalR hub, notification service) can react.
         await _publisher.Publish(
             new AlertCreatedEvent(alert.Id, alert.Severity, alert.HostId),
             cancellationToken);
@@ -56,6 +50,11 @@ public class CreateAlertCommandHandler : IRequestHandler<CreateAlertCommand, Ale
         return MapToDto(alert);
     }
 
+    /// <summary>
+    /// Maps an <see cref="Alert"/> entity to an <see cref="AlertDto"/>.
+    /// </summary>
+    /// <param name="alert">The alert entity to map.</param>
+    /// <returns>The mapped <see cref="AlertDto"/>.</returns>
     private static AlertDto MapToDto(Alert alert) => new()
     {
         Id = alert.Id,

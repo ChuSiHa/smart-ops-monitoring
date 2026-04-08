@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Input DTO for registering a new host.</summary>
+/// <summary>
+/// Input DTO for registering a new host.
+/// </summary>
 public class CreateHostDto
 {
     /// <summary>Gets or sets the display name for the new host.</summary>

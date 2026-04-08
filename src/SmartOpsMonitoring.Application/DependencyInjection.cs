@@ -1,7 +1,3 @@
-using FluentValidation;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace SmartOpsMonitoring.Application;
 
 /// <summary>

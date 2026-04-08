@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Input DTO for ingesting a new metric data point.</summary>
+/// <summary>
+/// Input DTO for ingesting a new metric data point.
+/// </summary>
 public class IngestMetricDto
 {
     /// <summary>Gets or sets the host identifier the metric originates from.</summary>

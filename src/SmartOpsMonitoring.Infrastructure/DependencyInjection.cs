@@ -1,13 +1,3 @@
-using Hangfire;
-using Hangfire.PostgreSql;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SmartOpsMonitoring.Domain.Repositories;
-using SmartOpsMonitoring.Infrastructure.Persistence;
-using SmartOpsMonitoring.Infrastructure.Persistence.Repositories;
-
 namespace SmartOpsMonitoring.Infrastructure;
 
 /// <summary>
@@ -41,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IServiceNodeRepository, ServiceNodeRepository>();
         services.AddScoped<IMetricRepository, MetricRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();
+        services.AddScoped<IAuthService, AuthService>();
 
         services.AddHangfire(cfg => cfg
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)

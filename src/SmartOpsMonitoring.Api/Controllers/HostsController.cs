@@ -1,10 +1,3 @@
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Application.Features.Hosts.Commands.CreateHost;
-using SmartOpsMonitoring.Application.Features.Hosts.Queries.GetHostById;
-using SmartOpsMonitoring.Application.Features.Hosts.Queries.GetHosts;
-
 namespace SmartOpsMonitoring.Api.Controllers;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace SmartOpsMonitoring.Api.Middleware;
 
 /// <summary>

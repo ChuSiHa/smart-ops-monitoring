@@ -1,13 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Hosts.Queries.GetHosts;
 
 /// <summary>
 /// Handles <see cref="GetHostsQuery"/> by returning all hosts as DTOs.
 /// </summary>
-public class GetHostsQueryHandler : IRequestHandler<GetHostsQuery, IEnumerable<HostDto>>
+public class GetHostsQueryHandler : IQueryHandler<GetHostsQuery, IEnumerable<HostDto>>
 {
     private readonly IHostRepository _hostRepository;
 

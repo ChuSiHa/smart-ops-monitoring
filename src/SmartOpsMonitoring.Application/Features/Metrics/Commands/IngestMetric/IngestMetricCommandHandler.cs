@@ -1,15 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Events;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Metrics.Commands.IngestMetric;
 
 /// <summary>
 /// Handles <see cref="IngestMetricCommand"/> by persisting the metric and publishing a domain event.
 /// </summary>
-public class IngestMetricCommandHandler : IRequestHandler<IngestMetricCommand, MetricDto>
+public class IngestMetricCommandHandler : ICommandHandler<IngestMetricCommand, MetricDto>
 {
     private readonly IMetricRepository _metricRepository;
     private readonly IPublisher _publisher;
@@ -47,6 +41,7 @@ public class IngestMetricCommandHandler : IRequestHandler<IngestMetricCommand, M
 
         await _metricRepository.AddAsync(metric, cancellationToken);
 
+        // Publish domain event so subscribers (e.g. SignalR MetricHub) can push updates to clients.
         await _publisher.Publish(
             new MetricReceivedEvent(metric.Id, metric.HostId, metric.MetricType, metric.Value),
             cancellationToken);
@@ -54,6 +49,11 @@ public class IngestMetricCommandHandler : IRequestHandler<IngestMetricCommand, M
         return MapToDto(metric);
     }
 
+    /// <summary>
+    /// Maps a <see cref="Metric"/> entity to a <see cref="MetricDto"/>.
+    /// </summary>
+    /// <param name="metric">The metric entity to map.</param>
+    /// <returns>The mapped <see cref="MetricDto"/>.</returns>
     private static MetricDto MapToDto(Metric metric) => new()
     {
         Id = metric.Id,

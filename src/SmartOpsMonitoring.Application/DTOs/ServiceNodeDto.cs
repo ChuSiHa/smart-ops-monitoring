@@ -1,8 +1,8 @@
-using SmartOpsMonitoring.Domain.Enums;
-
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Flat response DTO for a service node.</summary>
+/// <summary>
+/// Flat response DTO for a service node.
+/// </summary>
 public class ServiceNodeDto
 {
     /// <summary>Gets or sets the service node identifier.</summary>

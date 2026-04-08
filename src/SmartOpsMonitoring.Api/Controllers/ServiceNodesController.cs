@@ -1,9 +1,3 @@
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Application.Features.ServiceNodes.Commands.CreateServiceNode;
-using SmartOpsMonitoring.Application.Features.ServiceNodes.Queries.GetServiceNodesByHost;
-
 namespace SmartOpsMonitoring.Api.Controllers;
 
 /// <summary>

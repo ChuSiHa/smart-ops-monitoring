@@ -1,14 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.ServiceNodes.Commands.CreateServiceNode;
 
 /// <summary>
 /// Handles <see cref="CreateServiceNodeCommand"/> by persisting a new service node.
 /// </summary>
-public class CreateServiceNodeCommandHandler : IRequestHandler<CreateServiceNodeCommand, ServiceNodeDto>
+public class CreateServiceNodeCommandHandler : ICommandHandler<CreateServiceNodeCommand, ServiceNodeDto>
 {
     private readonly IServiceNodeRepository _serviceNodeRepository;
 

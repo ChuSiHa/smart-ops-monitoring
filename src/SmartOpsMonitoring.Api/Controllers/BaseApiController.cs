@@ -1,6 +1,3 @@
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-
 namespace SmartOpsMonitoring.Api.Controllers;
 
 /// <summary>

@@ -1,10 +1,3 @@
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
-using SmartOpsMonitoring.Application.Features.Alerts.Commands.UpdateAlertStatus;
-using SmartOpsMonitoring.Application.Features.Alerts.Queries.GetAlerts;
-
 namespace SmartOpsMonitoring.Api.Controllers;
 
 /// <summary>

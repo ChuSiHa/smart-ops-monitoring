@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Input DTO for registering a new service node.</summary>
+/// <summary>
+/// Input DTO for registering a new service node.
+/// </summary>
 public class CreateServiceNodeDto
 {
     /// <summary>Gets or sets the display name for the new service node.</summary>

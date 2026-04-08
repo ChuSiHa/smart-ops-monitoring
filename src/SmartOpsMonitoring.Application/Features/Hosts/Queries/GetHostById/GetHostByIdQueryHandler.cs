@@ -1,13 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Hosts.Queries.GetHostById;
 
 /// <summary>
 /// Handles <see cref="GetHostByIdQuery"/> by retrieving a single host entity.
 /// </summary>
-public class GetHostByIdQueryHandler : IRequestHandler<GetHostByIdQuery, HostDto?>
+public class GetHostByIdQueryHandler : IQueryHandler<GetHostByIdQuery, HostDto?>
 {
     private readonly IHostRepository _hostRepository;
 

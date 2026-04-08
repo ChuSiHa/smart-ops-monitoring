@@ -1,12 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-
 namespace SmartOpsMonitoring.Application.Features.Metrics.Queries.GetMetrics;
 
 /// <summary>
 /// Query to retrieve metrics for a specific host, optionally filtered by type and time range.
 /// </summary>
-public class GetMetricsByHostQuery : IRequest<IEnumerable<MetricDto>>
+public class GetMetricsByHostQuery : IQuery<IEnumerable<MetricDto>>
 {
     /// <summary>Gets or sets the host identifier.</summary>
     public Guid HostId { get; set; }

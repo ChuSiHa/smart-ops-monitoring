@@ -1,8 +1,8 @@
-using SmartOpsMonitoring.Domain.Enums;
-
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Flat response DTO for a monitored host.</summary>
+/// <summary>
+/// Flat response DTO for a monitored host.
+/// </summary>
 public class HostDto
 {
     /// <summary>Gets or sets the host identifier.</summary>

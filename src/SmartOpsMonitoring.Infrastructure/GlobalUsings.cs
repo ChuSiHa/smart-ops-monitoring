@@ -1,0 +1,11 @@
+global using Hangfire;
+global using Hangfire.PostgreSql;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using SmartOpsMonitoring.Application.Contracts;
+global using SmartOpsMonitoring.Domain.Repositories;
+global using SmartOpsMonitoring.Infrastructure.Persistence;
+global using SmartOpsMonitoring.Infrastructure.Persistence.Repositories;
+global using SmartOpsMonitoring.Infrastructure.Services;

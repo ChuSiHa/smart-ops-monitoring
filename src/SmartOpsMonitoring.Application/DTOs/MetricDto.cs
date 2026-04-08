@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Flat response DTO for a metric data point.</summary>
+/// <summary>
+/// Flat response DTO for a metric data point.
+/// </summary>
 public class MetricDto
 {
     /// <summary>Gets or sets the metric identifier.</summary>

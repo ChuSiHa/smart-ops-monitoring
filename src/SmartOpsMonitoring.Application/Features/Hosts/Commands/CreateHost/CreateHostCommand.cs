@@ -1,12 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-
 namespace SmartOpsMonitoring.Application.Features.Hosts.Commands.CreateHost;
 
 /// <summary>
 /// Command to register a new monitored host.
 /// </summary>
-public class CreateHostCommand : IRequest<HostDto>
+public class CreateHostCommand : ICommand<HostDto>
 {
     /// <summary>Gets or sets the display name for the new host.</summary>
     public string Name { get; set; } = string.Empty;

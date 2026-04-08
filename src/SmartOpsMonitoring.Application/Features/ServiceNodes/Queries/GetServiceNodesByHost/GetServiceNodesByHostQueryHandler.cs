@@ -1,13 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.ServiceNodes.Queries.GetServiceNodesByHost;
 
 /// <summary>
 /// Handles <see cref="GetServiceNodesByHostQuery"/> by retrieving service nodes for a host.
 /// </summary>
-public class GetServiceNodesByHostQueryHandler : IRequestHandler<GetServiceNodesByHostQuery, IEnumerable<ServiceNodeDto>>
+public class GetServiceNodesByHostQueryHandler : IQueryHandler<GetServiceNodesByHostQuery, IEnumerable<ServiceNodeDto>>
 {
     private readonly IServiceNodeRepository _serviceNodeRepository;
 

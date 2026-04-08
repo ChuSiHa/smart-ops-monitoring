@@ -1,13 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Hosts.Commands.CreateHost;
 
 /// <summary>
 /// Handles <see cref="CreateHostCommand"/> by creating and persisting a new host entity.
 /// </summary>
-public class CreateHostCommandHandler : IRequestHandler<CreateHostCommand, HostDto>
+public class CreateHostCommandHandler : ICommandHandler<CreateHostCommand, HostDto>
 {
     private readonly IHostRepository _hostRepository;
 

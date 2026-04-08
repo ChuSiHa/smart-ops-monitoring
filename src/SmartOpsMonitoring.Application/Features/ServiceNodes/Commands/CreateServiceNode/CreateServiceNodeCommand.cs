@@ -1,12 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-
 namespace SmartOpsMonitoring.Application.Features.ServiceNodes.Commands.CreateServiceNode;
 
 /// <summary>
 /// Command to register a new service node on a host.
 /// </summary>
-public class CreateServiceNodeCommand : IRequest<ServiceNodeDto>
+public class CreateServiceNodeCommand : ICommand<ServiceNodeDto>
 {
     /// <summary>Gets or sets the display name of the service node.</summary>
     public string Name { get; set; } = string.Empty;

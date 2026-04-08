@@ -1,14 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Metrics.Queries.GetMetrics;
 
 /// <summary>
 /// Handles <see cref="GetMetricsByHostQuery"/> by querying the metric repository.
 /// </summary>
-public class GetMetricsByHostQueryHandler : IRequestHandler<GetMetricsByHostQuery, IEnumerable<MetricDto>>
+public class GetMetricsByHostQueryHandler : IQueryHandler<GetMetricsByHostQuery, IEnumerable<MetricDto>>
 {
     private readonly IMetricRepository _metricRepository;
 

@@ -1,12 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-
 namespace SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
 
 /// <summary>
 /// Command to create a new monitoring alert.
 /// </summary>
-public class CreateAlertCommand : IRequest<AlertDto>
+public class CreateAlertCommand : ICommand<AlertDto>
 {
     /// <summary>Gets or sets the host identifier associated with this alert.</summary>
     public Guid HostId { get; set; }

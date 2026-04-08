@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Input DTO for updating the lifecycle status of an alert.</summary>
+/// <summary>
+/// Input DTO for updating the lifecycle status of an alert.
+/// </summary>
 public class UpdateAlertStatusDto
 {
     /// <summary>Gets or sets the identifier of the alert to update.</summary>

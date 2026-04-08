@@ -1,9 +1,3 @@
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Application.Features.Metrics.Commands.IngestMetric;
-using SmartOpsMonitoring.Application.Features.Metrics.Queries.GetMetrics;
-
 namespace SmartOpsMonitoring.Api.Controllers;
 
 /// <summary>
@@ -36,22 +30,18 @@ public class MetricsController : BaseApiController
     /// Returns metrics for a specific host, optionally filtered by type and time range.
     /// </summary>
     /// <param name="hostId">The host identifier.</param>
-    /// <param name="metricType">Optional metric type filter.</param>
-    /// <param name="from">Optional start of time range.</param>
-    /// <param name="to">Optional end of time range.</param>
+    /// <param name="request">Query parameters for filtering by metric type and time range.</param>
     /// <param name="ct">Cancellation token.</param>
     [HttpGet("host/{hostId:guid}")]
     public async Task<IActionResult> GetByHost(
         Guid hostId,
-        [FromQuery] string? metricType,
-        [FromQuery] DateTime? from,
-        [FromQuery] DateTime? to,
+        [FromQuery] GetMetricsByHostRequest request,
         CancellationToken ct)
         => Ok(await Sender.Send(new GetMetricsByHostQuery
         {
             HostId = hostId,
-            MetricType = metricType,
-            From = from,
-            To = to
+            MetricType = request.MetricType,
+            From = request.From,
+            To = request.To
         }, ct));
 }

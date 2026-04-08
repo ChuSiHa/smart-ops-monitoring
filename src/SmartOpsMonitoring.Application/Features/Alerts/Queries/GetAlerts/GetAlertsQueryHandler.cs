@@ -1,15 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Enums;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Alerts.Queries.GetAlerts;
 
 /// <summary>
 /// Handles <see cref="GetAlertsQuery"/> by querying the alert repository with optional filters.
 /// </summary>
-public class GetAlertsQueryHandler : IRequestHandler<GetAlertsQuery, IEnumerable<AlertDto>>
+public class GetAlertsQueryHandler : IQueryHandler<GetAlertsQuery, IEnumerable<AlertDto>>
 {
     private readonly IAlertRepository _alertRepository;
 

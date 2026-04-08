@@ -1,14 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-using SmartOpsMonitoring.Domain.Enums;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Application.Features.Alerts.Commands.UpdateAlertStatus;
 
 /// <summary>
 /// Handles <see cref="UpdateAlertStatusCommand"/> by updating an existing alert's status.
 /// </summary>
-public class UpdateAlertStatusCommandHandler : IRequestHandler<UpdateAlertStatusCommand, AlertDto>
+public class UpdateAlertStatusCommandHandler : ICommandHandler<UpdateAlertStatusCommand, AlertDto>
 {
     private readonly IAlertRepository _alertRepository;
 

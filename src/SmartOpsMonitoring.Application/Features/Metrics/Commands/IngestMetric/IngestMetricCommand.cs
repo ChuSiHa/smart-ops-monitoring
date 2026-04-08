@@ -1,12 +1,9 @@
-using MediatR;
-using SmartOpsMonitoring.Application.DTOs;
-
 namespace SmartOpsMonitoring.Application.Features.Metrics.Commands.IngestMetric;
 
 /// <summary>
 /// Command to ingest a new metric data point into the system.
 /// </summary>
-public class IngestMetricCommand : IRequest<MetricDto>
+public class IngestMetricCommand : ICommand<MetricDto>
 {
     /// <summary>Gets or sets the host identifier the metric originates from.</summary>
     public Guid HostId { get; set; }

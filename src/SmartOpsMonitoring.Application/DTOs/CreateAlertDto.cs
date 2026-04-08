@@ -1,6 +1,8 @@
 namespace SmartOpsMonitoring.Application.DTOs;
 
-/// <summary>Input DTO for creating a new alert.</summary>
+/// <summary>
+/// Input DTO for creating a new alert.
+/// </summary>
 public class CreateAlertDto
 {
     /// <summary>Gets or sets the host identifier associated with this alert.</summary>

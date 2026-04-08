@@ -1,7 +1,3 @@
-using System.Net;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-
 namespace SmartOpsMonitoring.Api.Middleware;
 
 /// <summary>
@@ -52,10 +48,23 @@ public class ErrorHandlingMiddleware
         }
     }
 
+    /// <summary>
+    /// Sanitizes a string value by replacing carriage-return and line-feed characters to
+    /// prevent log-injection attacks.
+    /// </summary>
+    /// <param name="value">The value to sanitize.</param>
+    /// <returns>The sanitized string.</returns>
     private static string Sanitize(string? value)
         => (value ?? string.Empty).Replace("\r", "\\r", StringComparison.Ordinal)
                                    .Replace("\n", "\\n", StringComparison.Ordinal);
 
+    /// <summary>
+    /// Writes a <see cref="ProblemDetails"/> JSON response to the HTTP context.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
+    /// <param name="statusCode">The HTTP status code to set.</param>
+    /// <param name="title">A short, human-readable summary of the problem.</param>
+    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem.</param>
     private static async Task WriteProblemAsync(HttpContext context, int statusCode, string title, string detail)
     {
         context.Response.StatusCode = statusCode;
