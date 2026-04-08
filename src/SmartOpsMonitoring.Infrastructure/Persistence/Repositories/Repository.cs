@@ -42,17 +42,17 @@ public class Repository<T> : IRepository<T> where T : class
     }
 
     /// <inheritdoc/>
-    public Task UpdateAsync(T entity)
+    public Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
         _context.Set<T>().Update(entity);
-        return _context.SaveChangesAsync();
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task DeleteAsync(T entity)
+    public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
     {
         _context.Set<T>().Remove(entity);
-        return _context.SaveChangesAsync();
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

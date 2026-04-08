@@ -32,11 +32,13 @@ public interface IRepository<T> where T : class
 
     /// <summary>Updates an existing entity in the store.</summary>
     /// <param name="entity">The entity with updated values.</param>
-    Task UpdateAsync(T entity);
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an entity from the store.</summary>
     /// <param name="entity">The entity to delete.</param>
-    Task DeleteAsync(T entity);
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
 
     /// <summary>Determines whether any entity satisfying the predicate exists.</summary>
     /// <param name="predicate">A filter expression.</param>

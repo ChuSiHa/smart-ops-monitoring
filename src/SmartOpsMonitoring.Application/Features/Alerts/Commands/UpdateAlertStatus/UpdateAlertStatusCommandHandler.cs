@@ -47,7 +47,7 @@ public class UpdateAlertStatusCommandHandler : IRequestHandler<UpdateAlertStatus
             alert.ResolvedAt = DateTime.UtcNow;
         }
 
-        await _alertRepository.UpdateAsync(alert);
+        await _alertRepository.UpdateAsync(alert, cancellationToken);
 
         return new AlertDto
         {

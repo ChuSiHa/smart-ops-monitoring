@@ -32,18 +32,24 @@ public class GetAlertsQueryHandler : IRequestHandler<GetAlertsQuery, IEnumerable
     {
         IEnumerable<Alert> alerts;
 
+        // Use specialised repository methods when possible for efficient DB-side filtering.
         if (request.HostId.HasValue)
         {
             alerts = await _alertRepository.GetByHostIdAsync(request.HostId.Value, cancellationToken);
         }
-        else if (!string.IsNullOrWhiteSpace(request.Severity) && Enum.TryParse<AlertSeverity>(request.Severity, true, out var sev))
+        else if (!string.IsNullOrWhiteSpace(request.Severity)
+                 && Enum.TryParse<AlertSeverity>(request.Severity, true, out var sev)
+                 && string.IsNullOrWhiteSpace(request.Status))
         {
+            // Severity-only filter — database handles it.
             alerts = await _alertRepository.GetBySeverityAsync(sev, cancellationToken);
         }
-        else if (!string.IsNullOrWhiteSpace(request.Status) &&
-                 Enum.TryParse<AlertStatus>(request.Status, true, out var stat) &&
-                 stat == AlertStatus.Open)
+        else if (!string.IsNullOrWhiteSpace(request.Status)
+                 && Enum.TryParse<AlertStatus>(request.Status, true, out var stat)
+                 && stat == AlertStatus.Open
+                 && string.IsNullOrWhiteSpace(request.Severity))
         {
+            // Open-only filter — database handles it.
             alerts = await _alertRepository.GetOpenAlertsAsync(cancellationToken);
         }
         else
@@ -51,7 +57,7 @@ public class GetAlertsQueryHandler : IRequestHandler<GetAlertsQuery, IEnumerable
             alerts = await _alertRepository.GetAllAsync(cancellationToken);
         }
 
-        // Apply remaining filters in memory (only for cases not already handled above)
+        // Apply any remaining in-memory filters not already handled by the DB query above.
         if (!string.IsNullOrWhiteSpace(request.Status) && Enum.TryParse<AlertStatus>(request.Status, true, out var statusFilter))
             alerts = alerts.Where(a => a.Status == statusFilter);
 
