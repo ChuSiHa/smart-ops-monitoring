@@ -1,72 +1,107 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Api.DTOs.Requests;
-using SmartOpsMonitoring.Api.Services;
+using Microsoft.IdentityModel.Tokens;
+using SmartOpsMonitoring.Infrastructure.Persistence;
 
 namespace SmartOpsMonitoring.Api.Controllers;
 
+/// <summary>
+/// Handles user registration and authentication, returning JWT tokens on success.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService)
+    /// <summary>
+    /// Initialises a new instance of <see cref="AuthController"/>.
+    /// </summary>
+    /// <param name="userManager">The ASP.NET Core Identity user manager.</param>
+    /// <param name="signInManager">The ASP.NET Core Identity sign-in manager.</param>
+    /// <param name="configuration">The application configuration.</param>
+    public AuthController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration)
     {
-        _authService = authService;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _configuration = configuration;
     }
 
-    /// <summary>Authenticate and receive a JWT token.</summary>
-    [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
-    {
-        var result = await _authService.LoginAsync(request, cancellationToken);
-        if (result == null)
-            return Unauthorized(new { message = "Invalid username or password." });
-
-        return Ok(result);
-    }
-
-    /// <summary>Register a new user account.</summary>
+    /// <summary>
+    /// Registers a new user account.
+    /// </summary>
+    /// <param name="request">The registration request containing email and password.</param>
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        try
+        var user = new ApplicationUser
         {
-            var user = await _authService.RegisterAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(Me), null, user);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+            UserName = request.Email,
+            Email = request.Email,
+            DisplayName = request.DisplayName ?? request.Email
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { message = "User registered successfully." });
     }
 
-    /// <summary>Get the currently authenticated user's profile.</summary>
-    [HttpGet("me")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Me(CancellationToken cancellationToken)
+    /// <summary>
+    /// Authenticates a user and returns a JWT bearer token.
+    /// </summary>
+    /// <param name="request">The login request containing email and password.</param>
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var userId = GetCurrentUserId();
-        if (userId == null) return Unauthorized();
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return Unauthorized(new { message = "Invalid credentials." });
 
-        var user = await _authService.GetCurrentUserAsync(userId.Value, cancellationToken);
-        if (user == null) return NotFound();
+        var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+        if (!result.Succeeded)
+            return Unauthorized(new { message = "Invalid credentials." });
 
-        return Ok(user);
+        var token = GenerateJwtToken(user);
+        return Ok(new { token });
     }
 
-    private int? GetCurrentUserId()
+    private string GenerateJwtToken(ApplicationUser user)
     {
-        var sub = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-               ?? User.FindFirst("sub")?.Value;
-        return int.TryParse(sub, out var id) ? id : null;
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expiry = DateTime.UtcNow.AddHours(double.Parse(_configuration["Jwt:ExpiryHours"] ?? "24"));
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Name, user.Email!)
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: expiry,
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
+
+/// <summary>User registration request model.</summary>
+public record RegisterRequest(string Email, string Password, string? DisplayName);
+
+/// <summary>User login request model.</summary>
+public record LoginRequest(string Email, string Password);

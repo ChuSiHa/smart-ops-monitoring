@@ -1,62 +1,57 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Api.DTOs.Requests;
-using SmartOpsMonitoring.Api.Services;
+using SmartOpsMonitoring.Application.Features.Metrics.Commands.IngestMetric;
+using SmartOpsMonitoring.Application.Features.Metrics.Queries.GetMetrics;
 
 namespace SmartOpsMonitoring.Api.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
+/// <summary>
+/// Exposes endpoints for ingesting and querying metric data.
+/// </summary>
 [Authorize]
-public class MetricsController : ControllerBase
+public class MetricsController : BaseApiController
 {
-    private readonly IMetricService _metricService;
-
-    public MetricsController(IMetricService metricService)
+    /// <summary>
+    /// Initialises a new instance of <see cref="MetricsController"/>.
+    /// </summary>
+    /// <param name="sender">The MediatR sender.</param>
+    public MetricsController(ISender sender) : base(sender)
     {
-        _metricService = metricService;
     }
 
-    /// <summary>Ingest a new metric data point.</summary>
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Ingest([FromBody] IngestMetricRequest request, CancellationToken cancellationToken)
+    /// <summary>
+    /// Ingests a new metric data point.
+    /// </summary>
+    /// <param name="command">The ingest metric command.</param>
+    /// <param name="ct">Cancellation token.</param>
+    [HttpPost("ingest")]
+    public async Task<IActionResult> Ingest([FromBody] IngestMetricCommand command, CancellationToken ct)
     {
-        try
-        {
-            var metric = await _metricService.IngestAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(Query), null, metric);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-    }
-
-    /// <summary>Query metrics with optional filters and pagination.</summary>
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Query([FromQuery] MetricQueryRequest query, CancellationToken cancellationToken)
-    {
-        var result = await _metricService.QueryAsync(query, cancellationToken);
+        var result = await Sender.Send(command, ct);
         return Ok(result);
     }
 
-    /// <summary>Get the latest value for each metric type from a specific device.</summary>
-    [HttpGet("devices/{deviceId:int}/latest")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetLatest(int deviceId, CancellationToken cancellationToken)
-    {
-        try
+    /// <summary>
+    /// Returns metrics for a specific host, optionally filtered by type and time range.
+    /// </summary>
+    /// <param name="hostId">The host identifier.</param>
+    /// <param name="metricType">Optional metric type filter.</param>
+    /// <param name="from">Optional start of time range.</param>
+    /// <param name="to">Optional end of time range.</param>
+    /// <param name="ct">Cancellation token.</param>
+    [HttpGet("host/{hostId:guid}")]
+    public async Task<IActionResult> GetByHost(
+        Guid hostId,
+        [FromQuery] string? metricType,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken ct)
+        => Ok(await Sender.Send(new GetMetricsByHostQuery
         {
-            var metrics = await _metricService.GetLatestByDeviceAsync(deviceId, cancellationToken);
-            return Ok(metrics);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-    }
+            HostId = hostId,
+            MetricType = metricType,
+            From = from,
+            To = to
+        }, ct));
 }

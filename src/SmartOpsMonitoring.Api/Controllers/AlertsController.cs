@@ -1,92 +1,66 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartOpsMonitoring.Api.DTOs.Requests;
-using SmartOpsMonitoring.Api.Services;
+using SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
+using SmartOpsMonitoring.Application.Features.Alerts.Commands.UpdateAlertStatus;
+using SmartOpsMonitoring.Application.Features.Alerts.Queries.GetAlerts;
 
 namespace SmartOpsMonitoring.Api.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
+/// <summary>
+/// Exposes endpoints for creating, querying, and updating monitoring alerts.
+/// </summary>
 [Authorize]
-public class AlertsController : ControllerBase
+public class AlertsController : BaseApiController
 {
-    private readonly IAlertService _alertService;
-
-    public AlertsController(IAlertService alertService)
+    /// <summary>
+    /// Initialises a new instance of <see cref="AlertsController"/>.
+    /// </summary>
+    /// <param name="sender">The MediatR sender.</param>
+    public AlertsController(ISender sender) : base(sender)
     {
-        _alertService = alertService;
     }
 
-    /// <summary>Get all alerts, optionally filtered by status and severity.</summary>
+    /// <summary>
+    /// Returns alerts, optionally filtered by host, status, or severity.
+    /// </summary>
+    /// <param name="hostId">Optional host identifier filter.</param>
+    /// <param name="status">Optional status string filter.</param>
+    /// <param name="severity">Optional severity string filter.</param>
+    /// <param name="ct">Cancellation token.</param>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(
+        [FromQuery] Guid? hostId,
         [FromQuery] string? status,
         [FromQuery] string? severity,
-        CancellationToken cancellationToken)
-    {
-        var alerts = await _alertService.GetAllAsync(status, severity, cancellationToken);
-        return Ok(alerts);
-    }
+        CancellationToken ct)
+        => Ok(await Sender.Send(new GetAlertsQuery { HostId = hostId, Status = status, Severity = severity }, ct));
 
-    /// <summary>Get an alert by ID.</summary>
-    [HttpGet("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
-    {
-        var alert = await _alertService.GetByIdAsync(id, cancellationToken);
-        if (alert == null) return NotFound();
-        return Ok(alert);
-    }
-
-    /// <summary>Create a new alert.</summary>
+    /// <summary>
+    /// Creates a new monitoring alert.
+    /// </summary>
+    /// <param name="command">The create alert command.</param>
+    /// <param name="ct">Cancellation token.</param>
     [HttpPost]
-    [Authorize(Roles = "Admin,Operator")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Create([FromBody] CreateAlertRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateAlertCommand command, CancellationToken ct)
     {
-        try
-        {
-            var alert = await _alertService.CreateAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = alert.Id }, alert);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var result = await Sender.Send(command, ct);
+        return Ok(result);
     }
 
-    /// <summary>Update an alert's status (Acknowledge or Resolve).</summary>
-    [HttpPatch("{id:int}")]
-    [Authorize(Roles = "Admin,Operator")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateAlertRequest request, CancellationToken cancellationToken)
+    /// <summary>
+    /// Updates the status of an existing alert.
+    /// </summary>
+    /// <param name="id">The alert identifier.</param>
+    /// <param name="command">The update status command.</param>
+    /// <param name="ct">Cancellation token.</param>
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> UpdateStatus(
+        Guid id, [FromBody] UpdateAlertStatusCommand command, CancellationToken ct)
     {
-        var userId = GetCurrentUserId() ?? 0;
-        var alert = await _alertService.UpdateAsync(id, request, userId, cancellationToken);
-        if (alert == null) return NotFound();
-        return Ok(alert);
-    }
-
-    /// <summary>Delete an alert.</summary>
-    [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
-    {
-        var deleted = await _alertService.DeleteAsync(id, cancellationToken);
-        if (!deleted) return NotFound();
-        return NoContent();
-    }
-
-    private int? GetCurrentUserId()
-    {
-        var sub = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-               ?? User.FindFirst("sub")?.Value;
-        return int.TryParse(sub, out var id) ? id : null;
+        command.AlertId = id;
+        command.UserId = User.Identity?.Name;
+        var result = await Sender.Send(command, ct);
+        return Ok(result);
     }
 }

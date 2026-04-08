@@ -1,116 +1,146 @@
 using System.Text;
+using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using SmartOpsMonitoring.Api.Data;
-using SmartOpsMonitoring.Api.Data.Repositories;
+using Microsoft.OpenApi.Models;
+using Serilog;
 using SmartOpsMonitoring.Api.Middleware;
-using SmartOpsMonitoring.Api.Models;
-using SmartOpsMonitoring.Api.Services;
+using SmartOpsMonitoring.Application;
+using SmartOpsMonitoring.Infrastructure;
+using SmartOpsMonitoring.Infrastructure.Hubs;
+using SmartOpsMonitoring.Infrastructure.Jobs;
+using SmartOpsMonitoring.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Database ──────────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .WriteTo.Console());
 
-// ── Repositories ──────────────────────────────────────────────────────────────
-builder.Services.AddScoped<IRepository<User>, Repository<User>>();
-builder.Services.AddScoped<IRepository<Device>, Repository<Device>>();
-builder.Services.AddScoped<IRepository<Metric>, Repository<Metric>>();
-builder.Services.AddScoped<IRepository<Alert>, Repository<Alert>>();
-builder.Services.AddScoped<IRepository<Dashboard>, Repository<Dashboard>>();
-builder.Services.AddScoped<IRepository<DataSource>, Repository<DataSource>>();
+// Application & Infrastructure services
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
-// ── Services ──────────────────────────────────────────────────────────────────
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IDeviceService, DeviceService>();
-builder.Services.AddScoped<IMetricService, MetricService>();
-builder.Services.AddScoped<IAlertService, AlertService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<IDataSourceService, DataSourceService>();
-
-// ── JWT Authentication ────────────────────────────────────────────────────────
-var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Key is not configured.");
-
+// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtSection = builder.Configuration.GetSection("Jwt");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSection["Key"]!))
+        };
+        // Allow JWT via query string for SignalR hubs
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs")))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            }
         };
     });
 
 builder.Services.AddAuthorization();
-
-// ── Controllers & Swagger ─────────────────────────────────────────────────────
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+
+// Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Smart Ops Monitoring API",
+        Title = "SmartOps Monitoring API",
         Version = "v1",
-        Description = "Backend API for the Smart Operations Monitoring platform."
+        Description = "Clean Architecture .NET 8 monitoring backend."
     });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    var securityScheme = new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
         Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
+        Description = "Enter your JWT token."
+    };
 
-    c.AddSecurityRequirement((doc) => new OpenApiSecurityRequirement
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecuritySchemeReference("Bearer", doc),
-            new List<string>()
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
         }
     });
 });
 
-// ── CORS ──────────────────────────────────────────────────────────────────────
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
-
 var app = builder.Build();
 
-// ── Middleware pipeline ───────────────────────────────────────────────────────
-app.UseMiddleware<GlobalExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-// ── Auto-migrate on startup ───────────────────────────────────────────────────
+// Auto-migrate on startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
 }
 
-app.Run();
+// Middleware pipeline
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartOps Monitoring v1"));
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
+app.MapControllers();
+app.MapHub<MetricHub>("/hubs/metrics");
+app.MapHub<AlertHub>("/hubs/alerts");
+
+// Register recurring Hangfire jobs
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    HangfireJobRegistrar.RegisterRecurringJobs(recurringJobManager);
+}
+
+await app.RunAsync();
+
+/// <summary>
+/// Hangfire dashboard authorization filter that requires an authenticated user.
+/// </summary>
+public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    /// <summary>
+    /// Authorizes access to the Hangfire dashboard by checking that the user is authenticated.
+    /// </summary>
+    /// <param name="context">The Hangfire dashboard context.</param>
+    /// <returns><c>true</c> if the user is authenticated; otherwise <c>false</c>.</returns>
+    public bool Authorize(DashboardContext context)
+    {
+        var httpContext = context.GetHttpContext();
+        return httpContext.User.Identity?.IsAuthenticated == true;
+    }
+}

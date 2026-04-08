@@ -1,4 +1,4 @@
-@SmartOpsMonitoring.Api_HostAddress = http://localhost:5109
+@SmartOpsMonitoring.Api_HostAddress = http://localhost:5143
 
 GET {{SmartOpsMonitoring.Api_HostAddress}}/weatherforecast/
 Accept: application/json

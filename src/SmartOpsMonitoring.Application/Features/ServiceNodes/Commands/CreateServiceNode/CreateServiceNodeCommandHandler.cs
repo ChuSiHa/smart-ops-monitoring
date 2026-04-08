@@ -1,0 +1,54 @@
+using MediatR;
+using SmartOpsMonitoring.Application.DTOs;
+using SmartOpsMonitoring.Domain.Entities;
+using SmartOpsMonitoring.Domain.Repositories;
+
+namespace SmartOpsMonitoring.Application.Features.ServiceNodes.Commands.CreateServiceNode;
+
+/// <summary>
+/// Handles <see cref="CreateServiceNodeCommand"/> by persisting a new service node.
+/// </summary>
+public class CreateServiceNodeCommandHandler : IRequestHandler<CreateServiceNodeCommand, ServiceNodeDto>
+{
+    private readonly IServiceNodeRepository _serviceNodeRepository;
+
+    /// <summary>
+    /// Initialises a new instance of <see cref="CreateServiceNodeCommandHandler"/>.
+    /// </summary>
+    /// <param name="serviceNodeRepository">The service node repository.</param>
+    public CreateServiceNodeCommandHandler(IServiceNodeRepository serviceNodeRepository)
+    {
+        _serviceNodeRepository = serviceNodeRepository;
+    }
+
+    /// <summary>
+    /// Executes the command: creates and persists a new <see cref="ServiceNode"/>.
+    /// </summary>
+    /// <param name="request">The create service node command.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="ServiceNodeDto"/> representing the newly created service node.</returns>
+    public async Task<ServiceNodeDto> Handle(CreateServiceNodeCommand request, CancellationToken cancellationToken)
+    {
+        var node = new ServiceNode
+        {
+            Name = request.Name,
+            Type = request.Type,
+            HostId = request.HostId,
+            Port = request.Port
+        };
+
+        await _serviceNodeRepository.AddAsync(node, cancellationToken);
+
+        return new ServiceNodeDto
+        {
+            Id = node.Id,
+            Name = node.Name,
+            Type = node.Type,
+            HostId = node.HostId,
+            Status = node.Status,
+            Port = node.Port,
+            CreatedAt = node.CreatedAt,
+            UpdatedAt = node.UpdatedAt
+        };
+    }
+}
