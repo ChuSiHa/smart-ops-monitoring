@@ -1,0 +1,123 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p class="subtitle">Real-time infrastructure overview</p>
+</div>
+
+<mat-spinner *ngIf="loading" diameter="40" class="loader"></mat-spinner>
+
+<ng-container *ngIf="!loading">
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-value green">{{ onlineCount }}</div>
+      <div class="summary-label">Hosts Online</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value red">{{ offlineCount }}</div>
+      <div class="summary-label">Hosts Offline</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value yellow">{{ openAlertCount }}</div>
+      <div class="summary-label">Open Alerts</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value red-bright">{{ criticalCount }}</div>
+      <div class="summary-label">Critical Alerts</div>
+    </div>
+  </div>
+
+  <!-- Gauge row -->
+  <div class="charts-row">
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>CPU Usage</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div echarts [options]="cpuGaugeOption" class="gauge-chart"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Memory Usage</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div echarts [options]="memGaugeOption" class="gauge-chart"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card alert-pie">
+      <mat-card-header>
+        <mat-card-title>Alert Breakdown</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div echarts [options]="alertPieOption" class="gauge-chart"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Metric time-series -->
+  <mat-card class="full-card">
+    <mat-card-header>
+      <mat-card-title>
+        Live Metrics
+        <span class="live-dot" *ngIf="liveMetrics.length > 0"></span>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div echarts [options]="metricLineOption" class="line-chart"></div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Two-column: Hosts + Active Alerts -->
+  <div class="two-col">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Hosts</mat-card-title>
+        <span class="view-all"><a routerLink="/hosts">View all →</a></span>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="hosts.slice(0,6)" class="w-full">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let h">
+              <a [routerLink]="['/hosts', h.id]" class="link">{{ h.name }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="ip">
+            <th mat-header-cell *matHeaderCellDef>IP</th>
+            <td mat-cell *matCellDef="let h" class="mono">{{ h.ipAddress }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let h">
+              <span class="status-badge" [ngClass]="'status-' + h.status">{{ h.status | hostStatus }}</span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name','ip','status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name','ip','status']"></tr>
+        </table>
+        <p *ngIf="hosts.length === 0" class="empty-msg">No hosts registered</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Active Alerts</mat-card-title>
+        <span class="view-all"><a routerLink="/alerts">View all →</a></span>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="alert-list">
+          <div *ngFor="let a of openAlerts.slice(0,5)" class="alert-item">
+            <div class="alert-row">
+              <span class="alert-title">{{ a.title }}</span>
+              <span class="sev-badge sev-{{ a.severity }}">{{ a.severity | alertSeverity }}</span>
+            </div>
+            <p class="alert-msg">{{ a.message }}</p>
+          </div>
+          <p *ngIf="openAlerts.length === 0" class="empty-msg">No open alerts 🎉</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-container>

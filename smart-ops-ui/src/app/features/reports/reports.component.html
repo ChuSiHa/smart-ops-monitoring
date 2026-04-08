@@ -1,0 +1,33 @@
+<div class="page-header">
+  <h1>Reports</h1>
+  <p class="subtitle">Historical analytics and trend analysis</p>
+</div>
+
+<mat-spinner *ngIf="loading" diameter="40" class="loader"></mat-spinner>
+
+<ng-container *ngIf="!loading">
+  <!-- Top row: host pie + alert bar -->
+  <div class="two-col">
+    <mat-card class="chart-card">
+      <mat-card-header><mat-card-title>Host Status Distribution</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div echarts [options]="hostPieOption" class="pie-chart"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header><mat-card-title>Alerts Last 7 Days</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div echarts [options]="alertBarOption" class="bar-chart"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Heatmap -->
+  <mat-card class="chart-card full-card">
+    <mat-card-header><mat-card-title>Alert Frequency Heatmap (Last 7 Days × Hour of Day)</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div echarts [options]="heatmapOption" class="heatmap-chart"></div>
+    </mat-card-content>
+  </mat-card>
+</ng-container>
