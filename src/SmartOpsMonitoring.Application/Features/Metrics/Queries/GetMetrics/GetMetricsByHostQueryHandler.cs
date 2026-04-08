@@ -36,16 +36,6 @@ public class GetMetricsByHostQueryHandler : IQueryHandler<GetMetricsByHostQuery,
             metrics = await _metricRepository.GetByHostIdAsync(request.HostId, cancellationToken);
         }
 
-        return metrics.Select(m => new MetricDto
-        {
-            Id = m.Id,
-            HostId = m.HostId,
-            ServiceNodeId = m.ServiceNodeId,
-            MetricType = m.MetricType,
-            Value = m.Value,
-            Unit = m.Unit,
-            Timestamp = m.Timestamp,
-            Labels = m.Labels
-        });
+        return metrics.Select(m => m.Adapt<MetricDto>());
     }
 }

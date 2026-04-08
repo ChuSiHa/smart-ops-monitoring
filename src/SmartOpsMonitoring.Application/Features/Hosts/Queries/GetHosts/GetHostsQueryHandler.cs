@@ -25,17 +25,6 @@ public class GetHostsQueryHandler : IQueryHandler<GetHostsQuery, IEnumerable<Hos
     public async Task<IEnumerable<HostDto>> Handle(GetHostsQuery request, CancellationToken cancellationToken)
     {
         var hosts = await _hostRepository.GetAllAsync(cancellationToken);
-
-        return hosts.Select(h => new HostDto
-        {
-            Id = h.Id,
-            Name = h.Name,
-            IpAddress = h.IpAddress,
-            OsType = h.OsType,
-            Status = h.Status,
-            Tags = h.Tags,
-            CreatedAt = h.CreatedAt,
-            UpdatedAt = h.UpdatedAt
-        });
+        return hosts.Select(h => h.Adapt<HostDto>());
     }
 }

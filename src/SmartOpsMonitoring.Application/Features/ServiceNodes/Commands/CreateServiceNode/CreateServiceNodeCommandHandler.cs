@@ -24,26 +24,8 @@ public class CreateServiceNodeCommandHandler : ICommandHandler<CreateServiceNode
     /// <returns>A <see cref="ServiceNodeDto"/> representing the newly created service node.</returns>
     public async Task<ServiceNodeDto> Handle(CreateServiceNodeCommand request, CancellationToken cancellationToken)
     {
-        var node = new ServiceNode
-        {
-            Name = request.Name,
-            Type = request.Type,
-            HostId = request.HostId,
-            Port = request.Port
-        };
-
+        var node = request.Adapt<ServiceNode>();
         await _serviceNodeRepository.AddAsync(node, cancellationToken);
-
-        return new ServiceNodeDto
-        {
-            Id = node.Id,
-            Name = node.Name,
-            Type = node.Type,
-            HostId = node.HostId,
-            Status = node.Status,
-            Port = node.Port,
-            CreatedAt = node.CreatedAt,
-            UpdatedAt = node.UpdatedAt
-        };
+        return node.Adapt<ServiceNodeDto>();
     }
 }

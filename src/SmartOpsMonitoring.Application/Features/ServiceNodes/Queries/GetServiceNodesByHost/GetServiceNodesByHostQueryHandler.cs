@@ -26,16 +26,6 @@ public class GetServiceNodesByHostQueryHandler : IQueryHandler<GetServiceNodesBy
     {
         var nodes = await _serviceNodeRepository.GetByHostIdAsync(request.HostId, cancellationToken);
 
-        return nodes.Select(n => new ServiceNodeDto
-        {
-            Id = n.Id,
-            Name = n.Name,
-            Type = n.Type,
-            HostId = n.HostId,
-            Status = n.Status,
-            Port = n.Port,
-            CreatedAt = n.CreatedAt,
-            UpdatedAt = n.UpdatedAt
-        });
+        return nodes.Select(n => n.Adapt<ServiceNodeDto>());
     }
 }

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace SmartOpsMonitoring.Infrastructure.Jobs;
 
 /// <summary>

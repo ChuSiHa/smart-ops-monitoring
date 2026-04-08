@@ -58,19 +58,6 @@ public class GetAlertsQueryHandler : IQueryHandler<GetAlertsQuery, IEnumerable<A
         if (!string.IsNullOrWhiteSpace(request.Severity) && Enum.TryParse<AlertSeverity>(request.Severity, true, out var severityFilter))
             alerts = alerts.Where(a => a.Severity == severityFilter);
 
-        return alerts.Select(a => new AlertDto
-        {
-            Id = a.Id,
-            HostId = a.HostId,
-            ServiceNodeId = a.ServiceNodeId,
-            Title = a.Title,
-            Message = a.Message,
-            Severity = a.Severity,
-            Status = a.Status,
-            AcknowledgedAt = a.AcknowledgedAt,
-            ResolvedAt = a.ResolvedAt,
-            AcknowledgedByUserId = a.AcknowledgedByUserId,
-            CreatedAt = a.CreatedAt
-        });
+        return alerts.Select(a => a.Adapt<AlertDto>());
     }
 }

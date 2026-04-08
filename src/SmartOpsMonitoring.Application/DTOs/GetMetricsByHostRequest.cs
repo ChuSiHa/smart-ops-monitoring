@@ -1,4 +1,4 @@
-namespace SmartOpsMonitoring.Api.DTOs;
+namespace SmartOpsMonitoring.Application.DTOs;
 
 /// <summary>
 /// Request DTO for querying metrics by host with optional filters.

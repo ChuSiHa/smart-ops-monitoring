@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using SmartOpsMonitoring.Domain.Entities;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Infrastructure.Persistence.Repositories;
 
 /// <summary>

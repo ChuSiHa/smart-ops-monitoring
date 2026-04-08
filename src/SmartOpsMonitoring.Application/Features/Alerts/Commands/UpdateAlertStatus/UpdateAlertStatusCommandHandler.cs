@@ -44,19 +44,6 @@ public class UpdateAlertStatusCommandHandler : ICommandHandler<UpdateAlertStatus
 
         await _alertRepository.UpdateAsync(alert, cancellationToken);
 
-        return new AlertDto
-        {
-            Id = alert.Id,
-            HostId = alert.HostId,
-            ServiceNodeId = alert.ServiceNodeId,
-            Title = alert.Title,
-            Message = alert.Message,
-            Severity = alert.Severity,
-            Status = alert.Status,
-            AcknowledgedAt = alert.AcknowledgedAt,
-            ResolvedAt = alert.ResolvedAt,
-            AcknowledgedByUserId = alert.AcknowledgedByUserId,
-            CreatedAt = alert.CreatedAt
-        };
+        return alert.Adapt<AlertDto>();
     }
 }

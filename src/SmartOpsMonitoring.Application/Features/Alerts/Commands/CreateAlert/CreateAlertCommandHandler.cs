@@ -28,18 +28,7 @@ public class CreateAlertCommandHandler : ICommandHandler<CreateAlertCommand, Ale
     /// <returns>An <see cref="AlertDto"/> representing the created alert.</returns>
     public async Task<AlertDto> Handle(CreateAlertCommand request, CancellationToken cancellationToken)
     {
-        var severity = Enum.Parse<AlertSeverity>(request.Severity, true);
-
-        var alert = new Alert
-        {
-            HostId = request.HostId,
-            ServiceNodeId = request.ServiceNodeId,
-            Title = request.Title,
-            Message = request.Message,
-            Severity = severity,
-            Status = AlertStatus.Open
-        };
-
+        var alert = request.Adapt<Alert>();
         await _alertRepository.AddAsync(alert, cancellationToken);
 
         // Publish domain event so subscribers (e.g. SignalR hub, notification service) can react.
@@ -47,7 +36,7 @@ public class CreateAlertCommandHandler : ICommandHandler<CreateAlertCommand, Ale
             new AlertCreatedEvent(alert.Id, alert.Severity, alert.HostId),
             cancellationToken);
 
-        return MapToDto(alert);
+        return alert.Adapt<AlertDto>();
     }
 
     /// <summary>
@@ -55,18 +44,5 @@ public class CreateAlertCommandHandler : ICommandHandler<CreateAlertCommand, Ale
     /// </summary>
     /// <param name="alert">The alert entity to map.</param>
     /// <returns>The mapped <see cref="AlertDto"/>.</returns>
-    private static AlertDto MapToDto(Alert alert) => new()
-    {
-        Id = alert.Id,
-        HostId = alert.HostId,
-        ServiceNodeId = alert.ServiceNodeId,
-        Title = alert.Title,
-        Message = alert.Message,
-        Severity = alert.Severity,
-        Status = alert.Status,
-        AcknowledgedAt = alert.AcknowledgedAt,
-        ResolvedAt = alert.ResolvedAt,
-        AcknowledgedByUserId = alert.AcknowledgedByUserId,
-        CreatedAt = alert.CreatedAt
-    };
+    private static AlertDto MapToDto(Alert alert) => alert.Adapt<AlertDto>();
 }

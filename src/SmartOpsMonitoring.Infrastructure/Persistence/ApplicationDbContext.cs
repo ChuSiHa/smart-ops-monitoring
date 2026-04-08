@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using SmartOpsMonitoring.Domain.Entities;
-
 namespace SmartOpsMonitoring.Infrastructure.Persistence;
 
 /// <summary>

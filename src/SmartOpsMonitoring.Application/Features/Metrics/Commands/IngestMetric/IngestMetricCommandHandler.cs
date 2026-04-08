@@ -28,17 +28,7 @@ public class IngestMetricCommandHandler : ICommandHandler<IngestMetricCommand, M
     /// <returns>A <see cref="MetricDto"/> representing the persisted metric.</returns>
     public async Task<MetricDto> Handle(IngestMetricCommand request, CancellationToken cancellationToken)
     {
-        var metric = new Metric
-        {
-            HostId = request.HostId,
-            ServiceNodeId = request.ServiceNodeId,
-            MetricType = request.MetricType,
-            Value = request.Value,
-            Unit = request.Unit,
-            Timestamp = request.Timestamp ?? DateTime.UtcNow,
-            Labels = request.Labels
-        };
-
+        var metric = request.Adapt<Metric>();
         await _metricRepository.AddAsync(metric, cancellationToken);
 
         // Publish domain event so subscribers (e.g. SignalR MetricHub) can push updates to clients.
@@ -46,7 +36,7 @@ public class IngestMetricCommandHandler : ICommandHandler<IngestMetricCommand, M
             new MetricReceivedEvent(metric.Id, metric.HostId, metric.MetricType, metric.Value),
             cancellationToken);
 
-        return MapToDto(metric);
+        return metric.Adapt<MetricDto>();
     }
 
     /// <summary>
@@ -54,15 +44,5 @@ public class IngestMetricCommandHandler : ICommandHandler<IngestMetricCommand, M
     /// </summary>
     /// <param name="metric">The metric entity to map.</param>
     /// <returns>The mapped <see cref="MetricDto"/>.</returns>
-    private static MetricDto MapToDto(Metric metric) => new()
-    {
-        Id = metric.Id,
-        HostId = metric.HostId,
-        ServiceNodeId = metric.ServiceNodeId,
-        MetricType = metric.MetricType,
-        Value = metric.Value,
-        Unit = metric.Unit,
-        Timestamp = metric.Timestamp,
-        Labels = metric.Labels
-    };
+    private static MetricDto MapToDto(Metric metric) => metric.Adapt<MetricDto>();
 }

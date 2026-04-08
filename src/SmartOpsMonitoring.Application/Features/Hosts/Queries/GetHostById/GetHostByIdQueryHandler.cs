@@ -25,18 +25,6 @@ public class GetHostByIdQueryHandler : IQueryHandler<GetHostByIdQuery, HostDto?>
     public async Task<HostDto?> Handle(GetHostByIdQuery request, CancellationToken cancellationToken)
     {
         var host = await _hostRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (host is null) return null;
-
-        return new HostDto
-        {
-            Id = host.Id,
-            Name = host.Name,
-            IpAddress = host.IpAddress,
-            OsType = host.OsType,
-            Status = host.Status,
-            Tags = host.Tags,
-            CreatedAt = host.CreatedAt,
-            UpdatedAt = host.UpdatedAt
-        };
+        return host?.Adapt<HostDto>();
     }
 }

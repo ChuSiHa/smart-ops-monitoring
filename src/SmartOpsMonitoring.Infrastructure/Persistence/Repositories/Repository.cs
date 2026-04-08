@@ -1,7 +1,3 @@
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using SmartOpsMonitoring.Domain.Repositories;
-
 namespace SmartOpsMonitoring.Infrastructure.Persistence.Repositories;
 
 /// <summary>

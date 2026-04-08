@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
-
 namespace SmartOpsMonitoring.Infrastructure.Hubs;
 
 /// <summary>

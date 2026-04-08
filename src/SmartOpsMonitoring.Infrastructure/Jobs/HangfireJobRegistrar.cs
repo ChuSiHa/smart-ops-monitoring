@@ -1,5 +1,3 @@
-using Hangfire;
-
 namespace SmartOpsMonitoring.Infrastructure.Jobs;
 
 /// <summary>
