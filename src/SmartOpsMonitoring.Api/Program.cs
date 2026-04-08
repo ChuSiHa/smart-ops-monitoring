@@ -1,18 +1,3 @@
-using System.Text;
-using Hangfire;
-using Hangfire.Dashboard;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Serilog;
-using SmartOpsMonitoring.Api.Middleware;
-using SmartOpsMonitoring.Application;
-using SmartOpsMonitoring.Infrastructure;
-using SmartOpsMonitoring.Infrastructure.Hubs;
-using SmartOpsMonitoring.Infrastructure.Jobs;
-using SmartOpsMonitoring.Infrastructure.Persistence;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Serilog

@@ -1,7 +1,9 @@
 namespace SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
 
 /// <summary>
-/// Command to create a new monitoring alert.
+/// Command to create a new monitoring alert for a host or service node.
+/// Encapsulates the alert title, message, severity, and target identifiers.
+/// Dispatched via MediatR and handled by <see cref="CreateAlertCommandHandler"/>.
 /// </summary>
 public class CreateAlertCommand : ICommand<AlertDto>
 {

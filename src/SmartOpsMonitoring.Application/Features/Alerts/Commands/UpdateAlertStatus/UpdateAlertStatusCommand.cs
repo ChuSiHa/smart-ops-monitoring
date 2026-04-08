@@ -2,6 +2,8 @@ namespace SmartOpsMonitoring.Application.Features.Alerts.Commands.UpdateAlertSta
 
 /// <summary>
 /// Command to update the lifecycle status of an existing alert.
+/// Supports transitions to Acknowledged or Resolved with an optional user reference.
+/// Dispatched via MediatR and handled by <see cref="UpdateAlertStatusCommandHandler"/>.
 /// </summary>
 public class UpdateAlertStatusCommand : ICommand<AlertDto>
 {
