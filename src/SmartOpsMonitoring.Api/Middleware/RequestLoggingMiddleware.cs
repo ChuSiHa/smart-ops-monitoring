@@ -37,10 +37,14 @@ public class RequestLoggingMiddleware
             sw.Stop();
             _logger.LogInformation(
                 "{Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
-                context.Request.Method,
-                context.Request.Path,
+                Sanitize(context.Request.Method),
+                Sanitize(context.Request.Path),
                 context.Response.StatusCode,
                 sw.ElapsedMilliseconds);
         }
     }
+
+    private static string Sanitize(string? value)
+        => (value ?? string.Empty).Replace("\r", "\\r", StringComparison.Ordinal)
+                                   .Replace("\n", "\\n", StringComparison.Ordinal);
 }

@@ -44,11 +44,17 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception for {Method} {Path}", context.Request.Method, context.Request.Path);
+            var safeMethod = Sanitize(context.Request.Method);
+            var safePath = Sanitize(context.Request.Path);
+            _logger.LogError(ex, "Unhandled exception for {Method} {Path}", safeMethod, safePath);
             await WriteProblemAsync(context, StatusCodes.Status500InternalServerError, "Internal Server Error",
                 "An unexpected error occurred.");
         }
     }
+
+    private static string Sanitize(string? value)
+        => (value ?? string.Empty).Replace("\r", "\\r", StringComparison.Ordinal)
+                                   .Replace("\n", "\\n", StringComparison.Ordinal);
 
     private static async Task WriteProblemAsync(HttpContext context, int statusCode, string title, string detail)
     {

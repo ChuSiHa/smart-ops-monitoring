@@ -51,10 +51,7 @@ public class GetAlertsQueryHandler : IRequestHandler<GetAlertsQuery, IEnumerable
             alerts = await _alertRepository.GetAllAsync(cancellationToken);
         }
 
-        // Apply remaining filters in memory
-        if (request.HostId.HasValue)
-            alerts = alerts.Where(a => a.HostId == request.HostId.Value);
-
+        // Apply remaining filters in memory (only for cases not already handled above)
         if (!string.IsNullOrWhiteSpace(request.Status) && Enum.TryParse<AlertStatus>(request.Status, true, out var statusFilter))
             alerts = alerts.Where(a => a.Status == statusFilter);
 
