@@ -85,6 +85,18 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
+// Seed Identity roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+    foreach (var role in new[] { "Admin", "Operator" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(role));
+    }
+}
+
 // Middleware pipeline
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();

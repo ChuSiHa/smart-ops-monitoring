@@ -1,0 +1,148 @@
+<div class="page-header">
+  <div>
+    <h1>Alerts</h1>
+    <p class="subtitle">Monitor and manage infrastructure alerts</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="showCreateForm = !showCreateForm">
+    <mat-icon>add</mat-icon>
+    New Alert
+  </button>
+</div>
+
+<!-- Create form -->
+<mat-card *ngIf="showCreateForm" class="create-card">
+  <mat-card-header>
+    <mat-card-title>Create Alert</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="createForm" (ngSubmit)="createAlert()" class="create-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Host</mat-label>
+        <mat-select formControlName="hostId">
+          <mat-option *ngFor="let h of hosts" [value]="h.id">{{ h.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Message</mat-label>
+        <textarea matInput formControlName="message" rows="2"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Severity</mat-label>
+        <mat-select formControlName="severity">
+          <mat-option [value]="AlertSeverity.Info">Info</mat-option>
+          <mat-option [value]="AlertSeverity.Warning">Warning</mat-option>
+          <mat-option [value]="AlertSeverity.Critical">Critical</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="showCreateForm = false">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="createForm.invalid">Create</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<!-- Filters -->
+<div class="filters">
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Status</mat-label>
+    <mat-select [(ngModel)]="filterStatus" (ngModelChange)="loadAlerts()">
+      <mat-option value="">All</mat-option>
+      <mat-option value="Open">Open</mat-option>
+      <mat-option value="Acknowledged">Acknowledged</mat-option>
+      <mat-option value="Resolved">Resolved</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Severity</mat-label>
+    <mat-select [(ngModel)]="filterSeverity" (ngModelChange)="loadAlerts()">
+      <mat-option value="">All</mat-option>
+      <mat-option value="Info">Info</mat-option>
+      <mat-option value="Warning">Warning</mat-option>
+      <mat-option value="Critical">Critical</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Host</mat-label>
+    <mat-select [(ngModel)]="filterHostId" (ngModelChange)="loadAlerts()">
+      <mat-option value="">All hosts</mat-option>
+      <mat-option *ngFor="let h of hosts" [value]="h.id">{{ h.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<!-- Alerts table -->
+<mat-card class="table-card">
+  <mat-spinner *ngIf="loading" diameter="36" class="table-loader"></mat-spinner>
+
+  <table mat-table [dataSource]="alerts" *ngIf="!loading">
+    <!-- Title -->
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef>Title</th>
+      <td mat-cell *matCellDef="let a">
+        <div class="alert-title">{{ a.title }}</div>
+        <div class="alert-msg-small">{{ a.message }}</div>
+      </td>
+    </ng-container>
+
+    <!-- Severity -->
+    <ng-container matColumnDef="severity">
+      <th mat-header-cell *matHeaderCellDef>Severity</th>
+      <td mat-cell *matCellDef="let a">
+        <span class="sev-badge sev-{{ a.severity }}">{{ a.severity | alertSeverity }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let a">
+        <span class="status-badge ast-{{ a.status }}">{{ a.status | alertStatus }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Host -->
+    <ng-container matColumnDef="host">
+      <th mat-header-cell *matHeaderCellDef>Host</th>
+      <td mat-cell *matCellDef="let a">{{ hostName(a.hostId) }}</td>
+    </ng-container>
+
+    <!-- Created At -->
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>Created</th>
+      <td mat-cell *matCellDef="let a">{{ a.createdAt | date:'short' }}</td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let a">
+        <button mat-icon-button matTooltip="Acknowledge"
+          [disabled]="a.status !== AlertStatus.Open"
+          (click)="acknowledge(a)">
+          <mat-icon>check_circle</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Resolve"
+          [disabled]="a.status === AlertStatus.Resolved"
+          (click)="resolve(a)">
+          <mat-icon>done_all</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <p *ngIf="!loading && alerts.length === 0" class="empty-msg">No alerts found</p>
+</mat-card>

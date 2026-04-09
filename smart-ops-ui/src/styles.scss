@@ -1,0 +1,66 @@
+/* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/purple-green.css';
+
+// ─── Global resets ────────────────────────────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0f1117;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+}
+
+// ─── Angular Material dark overrides ─────────────────────────────────────────
+.mat-mdc-card {
+  background: #161b27 !important;
+  border: 1px solid #1e2636 !important;
+  color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-label-text-color: #94a3b8;
+  --mdc-outlined-text-field-input-text-color: #e2e8f0;
+  --mdc-outlined-text-field-outline-color: #374151;
+  --mdc-outlined-text-field-hover-outline-color: #60a5fa;
+  --mdc-outlined-text-field-focus-outline-color: #60a5fa;
+  --mdc-filled-text-field-container-color: #161b27;
+}
+
+.mat-mdc-select-value-text { color: #e2e8f0 !important; }
+.mat-mdc-select-panel { background: #161b27 !important; }
+
+.mat-mdc-option {
+  background: #161b27 !important;
+  color: #e2e8f0 !important;
+}
+.mat-mdc-option:hover, .mat-mdc-option.mat-mdc-option-active {
+  background: #1e2636 !important;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #1e2636;
+  --mdc-snackbar-supporting-text-color: #e2e8f0;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: #374151 !important;
+}
+
+input.mat-mdc-input-element { color: #e2e8f0 !important; }
+
+// ─── Scrollbar styling ────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f1117; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+

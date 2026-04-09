@@ -1,0 +1,36 @@
+<div class="shell-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <mat-icon class="brand-icon">satellite_alt</mat-icon>
+      <span class="brand-name">SmartOps</span>
+    </div>
+
+    <nav class="nav-list">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        [matTooltip]="item.label"
+        matTooltipPosition="right"
+      >
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button mat-button class="logout-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

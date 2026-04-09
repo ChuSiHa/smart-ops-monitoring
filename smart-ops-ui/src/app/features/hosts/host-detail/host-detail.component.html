@@ -1,0 +1,116 @@
+<mat-spinner *ngIf="loading" diameter="40" class="loader"></mat-spinner>
+
+<ng-container *ngIf="!loading && host">
+  <div class="page-header">
+    <div>
+      <a routerLink="/hosts" class="back-link"><mat-icon>arrow_back</mat-icon> Hosts</a>
+      <h1>{{ host.name }}</h1>
+      <p class="subtitle mono">{{ host.ipAddress }} &bull; {{ host.osType }}</p>
+    </div>
+    <span class="status-badge status-{{ host.status }}">{{ host.status | hostStatus }}</span>
+  </div>
+
+  <!-- Host info cards -->
+  <div class="info-grid">
+    <mat-card class="info-card">
+      <mat-icon class="info-icon">dns</mat-icon>
+      <div>
+        <div class="info-label">Hostname</div>
+        <div class="info-value">{{ host.name }}</div>
+      </div>
+    </mat-card>
+    <mat-card class="info-card">
+      <mat-icon class="info-icon">router</mat-icon>
+      <div>
+        <div class="info-label">IP Address</div>
+        <div class="info-value mono">{{ host.ipAddress }}</div>
+      </div>
+    </mat-card>
+    <mat-card class="info-card">
+      <mat-icon class="info-icon">memory</mat-icon>
+      <div>
+        <div class="info-label">OS</div>
+        <div class="info-value">{{ host.osType }}</div>
+      </div>
+    </mat-card>
+    <mat-card class="info-card">
+      <mat-icon class="info-icon">schedule</mat-icon>
+      <div>
+        <div class="info-label">Registered</div>
+        <div class="info-value">{{ host.createdAt | date:'mediumDate' }}</div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Tags -->
+  <mat-card class="section-card" *ngIf="host.tags?.length">
+    <mat-card-header><mat-card-title>Tags</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <mat-chip-set>
+        <mat-chip *ngFor="let tag of host.tags" class="tag-chip">{{ tag }}</mat-chip>
+      </mat-chip-set>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Service Nodes -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>Service Nodes ({{ serviceNodes.length }})</mat-card-title>
+      <button mat-stroked-button (click)="showAddNode = !showAddNode" class="add-node-btn">
+        <mat-icon>add</mat-icon> Add Node
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Add node form -->
+      <form *ngIf="showAddNode" [formGroup]="nodeForm" (ngSubmit)="addNode()" class="node-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <input matInput formControlName="type" placeholder="e.g. nginx, postgres" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Port</mat-label>
+          <input matInput type="number" formControlName="port" />
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="showAddNode = false">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="nodeForm.invalid">Add</button>
+        </div>
+      </form>
+
+      <!-- Nodes table -->
+      <table mat-table [dataSource]="serviceNodes">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let n">{{ n.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let n">{{ n.type }}</td>
+        </ng-container>
+        <ng-container matColumnDef="port">
+          <th mat-header-cell *matHeaderCellDef>Port</th>
+          <td mat-cell *matCellDef="let n" class="mono">{{ n.port ?? '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let n">
+            <span class="sn-badge sn-{{ n.status }}">{{ n.status | serviceNodeStatus }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let n">{{ n.createdAt | date:'shortDate' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="nodeColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: nodeColumns"></tr>
+      </table>
+      <p *ngIf="serviceNodes.length === 0" class="empty-msg">No service nodes configured</p>
+    </mat-card-content>
+  </mat-card>
+</ng-container>

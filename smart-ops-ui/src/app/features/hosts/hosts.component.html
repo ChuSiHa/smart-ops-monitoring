@@ -1,0 +1,100 @@
+<div class="page-header">
+  <div>
+    <h1>Hosts</h1>
+    <p class="subtitle">Manage monitored infrastructure hosts</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="showCreateForm = !showCreateForm">
+    <mat-icon>add</mat-icon> Add Host
+  </button>
+</div>
+
+<!-- Create form -->
+<mat-card *ngIf="showCreateForm" class="create-card">
+  <mat-card-header><mat-card-title>Register New Host</mat-card-title></mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="createForm" (ngSubmit)="createHost()" class="create-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <mat-icon matPrefix>computer</mat-icon>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>IP Address</mat-label>
+        <mat-icon matPrefix>router</mat-icon>
+        <input matInput formControlName="ipAddress" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>OS Type</mat-label>
+        <mat-icon matPrefix>memory</mat-icon>
+        <input matInput formControlName="osType" placeholder="e.g. Ubuntu 22.04" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tags (comma-separated)</mat-label>
+        <mat-icon matPrefix>label</mat-icon>
+        <input matInput formControlName="tags" placeholder="web, prod, us-east" />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="showCreateForm = false">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="createForm.invalid">Register</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<!-- Hosts table -->
+<mat-card class="table-card">
+  <mat-spinner *ngIf="loading" diameter="36" class="table-loader"></mat-spinner>
+
+  <table mat-table [dataSource]="hosts" *ngIf="!loading">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let h">
+        <a [routerLink]="['/hosts', h.id]" class="link">{{ h.name }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="ip">
+      <th mat-header-cell *matHeaderCellDef>IP Address</th>
+      <td mat-cell *matCellDef="let h" class="mono">{{ h.ipAddress }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="osType">
+      <th mat-header-cell *matHeaderCellDef>OS</th>
+      <td mat-cell *matCellDef="let h">{{ h.osType }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let h">
+        <span class="status-badge status-{{ h.status }}">{{ h.status | hostStatus }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="tags">
+      <th mat-header-cell *matHeaderCellDef>Tags</th>
+      <td mat-cell *matCellDef="let h">
+        <mat-chip-set>
+          <mat-chip *ngFor="let tag of h.tags" class="tag-chip">{{ tag }}</mat-chip>
+        </mat-chip-set>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let h">
+        <button mat-icon-button matTooltip="View Details" [routerLink]="['/hosts', h.id]">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <p *ngIf="!loading && hosts.length === 0" class="empty-msg">No hosts registered yet. Click "Add Host" to start.</p>
+</mat-card>
