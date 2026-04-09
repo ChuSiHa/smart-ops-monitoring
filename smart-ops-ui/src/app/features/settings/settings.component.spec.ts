@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { SettingsComponent } from './settings.component';
@@ -14,7 +18,7 @@ describe('SettingsComponent', () => {
     snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
+      imports: [ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, BrowserAnimationsModule],
       declarations: [SettingsComponent],
       providers: [{ provide: MatSnackBar, useValue: snackBar }],
       schemas: [NO_ERRORS_SCHEMA],

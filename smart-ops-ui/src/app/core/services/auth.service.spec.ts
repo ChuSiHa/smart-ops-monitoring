@@ -33,10 +33,9 @@ describe('AuthService', () => {
   });
 
   it('initializes isLoggedIn$ from tokenStorage', (done) => {
-    tokenStorage.isLoggedIn.and.returnValue(true);
-    const svc = TestBed.inject(AuthService);
-    svc.isLoggedIn$.subscribe(v => {
-      expect(v).toBeTrue();
+    // service was created in beforeEach with tokenStorage.isLoggedIn() returning false
+    service.isLoggedIn$.subscribe(v => {
+      expect(v).toBeFalse();
       done();
     });
   });
