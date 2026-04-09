@@ -9,18 +9,26 @@ using SmartOpsMonitoring.Domain.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for <see cref="CreateAlertCommandHandler"/>.
+/// </summary>
 public class CreateAlertCommandHandlerTests
 {
     private readonly Mock<IAlertRepository> _alertRepositoryMock = new();
     private readonly Mock<MediatR.IPublisher> _publisherMock = new();
     private readonly CreateAlertCommandHandler _handler;
 
+    /// <summary>Initialises mocks and registers Mapster mappings required by the handler.</summary>
     public CreateAlertCommandHandlerTests()
     {
         MappingConfig.RegisterMappings();
         _handler = new CreateAlertCommandHandler(_alertRepositoryMock.Object, _publisherMock.Object);
     }
 
+    /// <summary>
+    /// Verifies that handling a valid command persists the alert to the repository and
+    /// publishes an <see cref="AlertCreatedEvent"/> with the correct host and severity.
+    /// </summary>
     [Fact]
     public async Task Handle_ValidCommand_AddsAlertAndPublishesEvent()
     {
@@ -47,6 +55,10 @@ public class CreateAlertCommandHandlerTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that when a <c>ServiceNodeId</c> is provided on the command, it is reflected
+    /// in the returned <see cref="AlertDto"/>.
+    /// </summary>
     [Fact]
     public async Task Handle_WithServiceNodeId_IncludesServiceNodeId()
     {
@@ -65,6 +77,10 @@ public class CreateAlertCommandHandlerTests
         result.ServiceNodeId.Should().Be(serviceNodeId);
     }
 
+    /// <summary>
+    /// Verifies that all three severity strings ("Info", "Warning", "Critical") are correctly
+    /// mapped to their corresponding <see cref="AlertSeverity"/> enum values.
+    /// </summary>
     [Theory]
     [InlineData("Info", AlertSeverity.Info)]
     [InlineData("Warning", AlertSeverity.Warning)]
@@ -84,6 +100,10 @@ public class CreateAlertCommandHandlerTests
         result.Severity.Should().Be(expectedSeverity);
     }
 
+    /// <summary>
+    /// Verifies that a newly created alert always has <see cref="AlertStatus.Open"/> status,
+    /// regardless of what was supplied on the command.
+    /// </summary>
     [Fact]
     public async Task Handle_NewAlert_HasOpenStatus()
     {

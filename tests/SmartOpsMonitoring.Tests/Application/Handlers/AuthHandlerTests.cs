@@ -7,12 +7,20 @@ using SmartOpsMonitoring.Application.Features.Auth.Commands.RegisterUser;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for authentication-related CQRS handlers:
+/// <see cref="LoginCommandHandler"/> and <see cref="RegisterUserCommandHandler"/>.
+/// </summary>
 public class AuthHandlerTests
 {
     private readonly Mock<IAuthService> _authServiceMock = new();
 
     // --- LoginCommandHandler ---
 
+    /// <summary>
+    /// Verifies that valid credentials are forwarded to the <see cref="IAuthService"/>
+    /// and the resulting <see cref="LoginResultDto"/> (containing the JWT token) is returned.
+    /// </summary>
     [Fact]
     public async Task LoginHandler_ValidCredentials_ReturnsLoginResultDto()
     {
@@ -30,6 +38,10 @@ public class AuthHandlerTests
         _authServiceMock.Verify(s => s.LoginAsync("user@test.com", "Password1!", It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that an <see cref="UnauthorizedAccessException"/> thrown by the auth service
+    /// is propagated to the caller without being swallowed.
+    /// </summary>
     [Fact]
     public async Task LoginHandler_InvalidCredentials_PropagatesException()
     {
@@ -46,6 +58,10 @@ public class AuthHandlerTests
 
     // --- RegisterUserCommandHandler ---
 
+    /// <summary>
+    /// Verifies that a valid registration command is forwarded to the <see cref="IAuthService"/>
+    /// and the confirmation message is returned in the <see cref="RegisterResultDto"/>.
+    /// </summary>
     [Fact]
     public async Task RegisterHandler_ValidCommand_ReturnsRegisterResultDto()
     {
@@ -63,6 +79,10 @@ public class AuthHandlerTests
             s => s.RegisterAsync("new@test.com", "Password1!", "New User", It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that a null <c>DisplayName</c> is passed through to the auth service as-is
+    /// rather than being substituted with a default value at the handler level.
+    /// </summary>
     [Fact]
     public async Task RegisterHandler_NullDisplayName_DelegatesToAuthService()
     {
@@ -80,6 +100,10 @@ public class AuthHandlerTests
             s => s.RegisterAsync("user@test.com", "Password1!", null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that an <see cref="InvalidOperationException"/> thrown by the auth service
+    /// during registration is propagated to the caller unchanged.
+    /// </summary>
     [Fact]
     public async Task RegisterHandler_FailedRegistration_PropagatesException()
     {

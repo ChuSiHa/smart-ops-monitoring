@@ -3,8 +3,15 @@ using SmartOpsMonitoring.Domain.ValueObjects;
 
 namespace SmartOpsMonitoring.Tests.Domain;
 
+/// <summary>
+/// Unit tests for the <see cref="IpAddress"/> value object.
+/// </summary>
 public class IpAddressTests
 {
+    /// <summary>
+    /// Verifies that a well-formed IPv4 or IPv6 string produces an <see cref="IpAddress"/>
+    /// whose <c>Value</c> matches the input.
+    /// </summary>
     [Theory]
     [InlineData("192.168.1.1")]
     [InlineData("10.0.0.1")]
@@ -19,6 +26,10 @@ public class IpAddressTests
         result.Value.Should().Be(ip);
     }
 
+    /// <summary>
+    /// Verifies that a null, empty, or whitespace-only input returns an
+    /// <see cref="IpAddress"/> with an empty <c>Value</c> rather than throwing.
+    /// </summary>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -30,6 +41,10 @@ public class IpAddressTests
         result.Value.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Verifies that an invalid IP string throws an <see cref="ArgumentException"/>
+    /// whose message identifies the offending value.
+    /// </summary>
     [Theory]
     [InlineData("999.999.999.999")]
     [InlineData("not-an-ip")]
@@ -43,6 +58,9 @@ public class IpAddressTests
             .WithMessage($"'{ip}' is not a valid IP address.*");
     }
 
+    /// <summary>
+    /// Verifies that <see cref="IpAddress.ToString"/> returns the underlying IP string.
+    /// </summary>
     [Fact]
     public void ToString_ReturnsValue()
     {
@@ -51,6 +69,10 @@ public class IpAddressTests
         ip.ToString().Should().Be("10.0.0.5");
     }
 
+    /// <summary>
+    /// Verifies that two <see cref="IpAddress"/> instances created from the same string
+    /// are considered equal (record value semantics).
+    /// </summary>
     [Fact]
     public void Create_SameIp_EqualValueObjects()
     {
@@ -60,6 +82,10 @@ public class IpAddressTests
         ip1.Should().Be(ip2);
     }
 
+    /// <summary>
+    /// Verifies that two <see cref="IpAddress"/> instances created from different strings
+    /// are not equal.
+    /// </summary>
     [Fact]
     public void Create_DifferentIps_NotEqual()
     {

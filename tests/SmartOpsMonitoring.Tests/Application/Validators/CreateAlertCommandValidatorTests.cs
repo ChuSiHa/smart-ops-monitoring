@@ -3,10 +3,14 @@ using SmartOpsMonitoring.Application.Features.Alerts.Commands.CreateAlert;
 
 namespace SmartOpsMonitoring.Tests.Application.Validators;
 
+/// <summary>
+/// Unit tests for <see cref="CreateAlertCommandValidator"/>.
+/// </summary>
 public class CreateAlertCommandValidatorTests
 {
     private readonly CreateAlertCommandValidator _validator = new();
 
+    /// <summary>Returns a fully populated, valid <see cref="CreateAlertCommand"/> for use as a baseline.</summary>
     private static CreateAlertCommand ValidCommand() => new()
     {
         HostId = Guid.NewGuid(),
@@ -15,6 +19,9 @@ public class CreateAlertCommandValidatorTests
         Severity = "Warning"
     };
 
+    /// <summary>
+    /// Verifies that a fully populated, valid command passes all validation rules.
+    /// </summary>
     [Fact]
     public async Task Validate_ValidCommand_Passes()
     {
@@ -23,6 +30,9 @@ public class CreateAlertCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>HostId</c> produces a validation error on the <c>HostId</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyHostId_Fails()
     {
@@ -35,6 +45,9 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.HostId));
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>Title</c> produces a validation error on the <c>Title</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyTitle_Fails()
     {
@@ -47,6 +60,9 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Title));
     }
 
+    /// <summary>
+    /// Verifies that a <c>Title</c> exceeding the 200-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_TitleExceedsMaxLength_Fails()
     {
@@ -59,6 +75,9 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Title));
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>Message</c> produces a validation error on the <c>Message</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyMessage_Fails()
     {
@@ -71,6 +90,9 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Message));
     }
 
+    /// <summary>
+    /// Verifies that a <c>Message</c> exceeding the 2000-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_MessageExceedsMaxLength_Fails()
     {
@@ -83,6 +105,10 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Message));
     }
 
+    /// <summary>
+    /// Verifies that each valid severity string ("Info", "Warning", "Critical") passes validation,
+    /// including case-insensitive variants.
+    /// </summary>
     [Theory]
     [InlineData("Info")]
     [InlineData("Warning")]
@@ -99,6 +125,9 @@ public class CreateAlertCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that unrecognised or empty severity strings fail validation on the <c>Severity</c> field.
+    /// </summary>
     [Theory]
     [InlineData("")]
     [InlineData("Unknown")]
@@ -115,6 +144,9 @@ public class CreateAlertCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Severity));
     }
 
+    /// <summary>
+    /// Verifies that omitting the optional <c>ServiceNodeId</c> (null) does not affect validation.
+    /// </summary>
     [Fact]
     public async Task Validate_OptionalServiceNodeId_IsAllowedNull()
     {
@@ -126,6 +158,9 @@ public class CreateAlertCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that providing a valid <c>ServiceNodeId</c> passes validation.
+    /// </summary>
     [Fact]
     public async Task Validate_WithServiceNodeId_Passes()
     {

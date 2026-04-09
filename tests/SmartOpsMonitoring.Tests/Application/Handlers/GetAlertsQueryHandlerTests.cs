@@ -8,17 +8,22 @@ using SmartOpsMonitoring.Domain.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for <see cref="GetAlertsQueryHandler"/>.
+/// </summary>
 public class GetAlertsQueryHandlerTests
 {
     private readonly Mock<IAlertRepository> _alertRepositoryMock = new();
     private readonly GetAlertsQueryHandler _handler;
 
+    /// <summary>Initialises mocks and registers Mapster mappings required by the handler.</summary>
     public GetAlertsQueryHandlerTests()
     {
         MappingConfig.RegisterMappings();
         _handler = new GetAlertsQueryHandler(_alertRepositoryMock.Object);
     }
 
+    /// <summary>Creates a test <see cref="Alert"/> with the specified severity, status, and host.</summary>
     private static Alert MakeAlert(AlertSeverity severity = AlertSeverity.Warning, AlertStatus status = AlertStatus.Open, Guid? hostId = null) => new()
     {
         Id = Guid.NewGuid(),
@@ -29,6 +34,10 @@ public class GetAlertsQueryHandlerTests
         Status = status
     };
 
+    /// <summary>
+    /// Verifies that when no filters are specified the handler calls <c>GetAllAsync</c>
+    /// and returns all available alerts.
+    /// </summary>
     [Fact]
     public async Task Handle_NoFilters_ReturnsAllAlerts()
     {
@@ -41,6 +50,10 @@ public class GetAlertsQueryHandlerTests
         result.Should().HaveCount(2);
     }
 
+    /// <summary>
+    /// Verifies that providing a <c>HostId</c> filter routes the query to
+    /// <c>GetByHostIdAsync</c> rather than the general <c>GetAllAsync</c>.
+    /// </summary>
     [Fact]
     public async Task Handle_HostIdFilter_UsesGetByHostId()
     {
@@ -55,6 +68,10 @@ public class GetAlertsQueryHandlerTests
         _alertRepositoryMock.Verify(r => r.GetByHostIdAsync(hostId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that providing only a <c>Severity</c> filter routes the query to
+    /// <c>GetBySeverityAsync</c> for efficient database-side filtering.
+    /// </summary>
     [Fact]
     public async Task Handle_SeverityOnlyFilter_UsesGetBySeverity()
     {
@@ -68,6 +85,10 @@ public class GetAlertsQueryHandlerTests
         _alertRepositoryMock.Verify(r => r.GetBySeverityAsync(AlertSeverity.Critical, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that providing only an "Open" <c>Status</c> filter routes the query to
+    /// <c>GetOpenAlertsAsync</c> for efficient database-side filtering.
+    /// </summary>
     [Fact]
     public async Task Handle_OpenStatusOnlyFilter_UsesGetOpenAlerts()
     {
@@ -81,6 +102,10 @@ public class GetAlertsQueryHandlerTests
         _alertRepositoryMock.Verify(r => r.GetOpenAlertsAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that combining both <c>Status</c> and <c>Severity</c> filters falls back to
+    /// <c>GetAllAsync</c> followed by in-memory filtering, returning only the intersection.
+    /// </summary>
     [Fact]
     public async Task Handle_StatusAndSeverityFilter_FiltersInMemory()
     {
@@ -102,6 +127,9 @@ public class GetAlertsQueryHandlerTests
         result.First().Severity.Should().Be(AlertSeverity.Critical);
     }
 
+    /// <summary>
+    /// Verifies that when the repository contains no alerts, the handler returns an empty collection.
+    /// </summary>
     [Fact]
     public async Task Handle_EmptyRepository_ReturnsEmpty()
     {
@@ -113,6 +141,10 @@ public class GetAlertsQueryHandlerTests
         result.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Verifies that an unrecognised <c>Severity</c> string falls back to <c>GetAllAsync</c>
+    /// without applying any severity filtering.
+    /// </summary>
     [Fact]
     public async Task Handle_InvalidSeverityFilter_FallsBackToGetAll()
     {

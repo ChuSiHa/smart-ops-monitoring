@@ -3,10 +3,14 @@ using SmartOpsMonitoring.Application.Features.ServiceNodes.Commands.CreateServic
 
 namespace SmartOpsMonitoring.Tests.Application.Validators;
 
+/// <summary>
+/// Unit tests for <see cref="CreateServiceNodeCommandValidator"/>.
+/// </summary>
 public class CreateServiceNodeCommandValidatorTests
 {
     private readonly CreateServiceNodeCommandValidator _validator = new();
 
+    /// <summary>Returns a fully populated, valid <see cref="CreateServiceNodeCommand"/> for use as a baseline.</summary>
     private static CreateServiceNodeCommand ValidCommand() => new()
     {
         Name = "nginx",
@@ -15,6 +19,9 @@ public class CreateServiceNodeCommandValidatorTests
         Port = 80
     };
 
+    /// <summary>
+    /// Verifies that a fully populated, valid command passes all validation rules.
+    /// </summary>
     [Fact]
     public async Task Validate_ValidCommand_Passes()
     {
@@ -22,6 +29,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>Name</c> produces a validation error on the <c>Name</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyName_Fails()
     {
@@ -32,6 +42,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Name));
     }
 
+    /// <summary>
+    /// Verifies that a <c>Name</c> exceeding the 200-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_NameExceedsMaxLength_Fails()
     {
@@ -42,6 +55,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Name));
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>Type</c> produces a validation error on the <c>Type</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyType_Fails()
     {
@@ -52,6 +68,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Type));
     }
 
+    /// <summary>
+    /// Verifies that a <c>Type</c> exceeding the 100-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_TypeExceedsMaxLength_Fails()
     {
@@ -62,6 +81,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Type));
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>HostId</c> produces a validation error on the <c>HostId</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyHostId_Fails()
     {
@@ -72,6 +94,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.HostId));
     }
 
+    /// <summary>
+    /// Verifies that port numbers within the valid range (1–65535) pass validation.
+    /// </summary>
     [Theory]
     [InlineData(1)]
     [InlineData(80)]
@@ -85,6 +110,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that port numbers outside the valid range (0, negative, or above 65535) fail validation.
+    /// </summary>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
@@ -99,6 +127,9 @@ public class CreateServiceNodeCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Port));
     }
 
+    /// <summary>
+    /// Verifies that omitting the optional <c>Port</c> (null) does not affect validation.
+    /// </summary>
     [Fact]
     public async Task Validate_NullPort_Passes()
     {

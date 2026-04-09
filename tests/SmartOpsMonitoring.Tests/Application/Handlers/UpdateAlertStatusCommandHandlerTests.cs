@@ -8,17 +8,22 @@ using SmartOpsMonitoring.Domain.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for <see cref="UpdateAlertStatusCommandHandler"/>.
+/// </summary>
 public class UpdateAlertStatusCommandHandlerTests
 {
     private readonly Mock<IAlertRepository> _alertRepositoryMock = new();
     private readonly UpdateAlertStatusCommandHandler _handler;
 
+    /// <summary>Initialises mocks and registers Mapster mappings required by the handler.</summary>
     public UpdateAlertStatusCommandHandlerTests()
     {
         MappingConfig.RegisterMappings();
         _handler = new UpdateAlertStatusCommandHandler(_alertRepositoryMock.Object);
     }
 
+    /// <summary>Creates a test <see cref="Alert"/> with the given status.</summary>
     private static Alert CreateAlert(AlertStatus status = AlertStatus.Open) => new()
     {
         Id = Guid.NewGuid(),
@@ -29,6 +34,10 @@ public class UpdateAlertStatusCommandHandlerTests
         Status = status
     };
 
+    /// <summary>
+    /// Verifies that a <see cref="KeyNotFoundException"/> is thrown when the alert
+    /// identifier does not match any persisted alert.
+    /// </summary>
     [Fact]
     public async Task Handle_AlertNotFound_ThrowsKeyNotFoundException()
     {
@@ -41,6 +50,10 @@ public class UpdateAlertStatusCommandHandlerTests
             .Should().ThrowAsync<KeyNotFoundException>();
     }
 
+    /// <summary>
+    /// Verifies that acknowledging an alert sets <c>AcknowledgedAt</c> and <c>AcknowledgedByUserId</c>,
+    /// and that the repository's <c>UpdateAsync</c> is called once.
+    /// </summary>
     [Fact]
     public async Task Handle_AcknowledgeAlert_SetsAcknowledgedAtAndUserId()
     {
@@ -65,6 +78,9 @@ public class UpdateAlertStatusCommandHandlerTests
         _alertRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Alert>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that resolving an alert sets the <c>ResolvedAt</c> timestamp.
+    /// </summary>
     [Fact]
     public async Task Handle_ResolveAlert_SetsResolvedAt()
     {
@@ -84,6 +100,10 @@ public class UpdateAlertStatusCommandHandlerTests
         result.ResolvedAt.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Verifies that transitioning an alert back to <c>Open</c> does not set
+    /// <c>AcknowledgedAt</c> or <c>ResolvedAt</c>.
+    /// </summary>
     [Fact]
     public async Task Handle_UpdateToOpen_DoesNotSetAcknowledgedOrResolved()
     {
@@ -101,6 +121,9 @@ public class UpdateAlertStatusCommandHandlerTests
         result.ResolvedAt.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that a successful status update also advances the alert's <c>UpdatedAt</c> timestamp.
+    /// </summary>
     [Fact]
     public async Task Handle_ValidUpdate_UpdatesUpdatedAt()
     {

@@ -7,10 +7,19 @@ using SmartOpsMonitoring.Infrastructure.Persistence.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Infrastructure;
 
+/// <summary>
+/// Integration-style unit tests for EF Core repository implementations using the
+/// in-memory database provider. Each test class instance uses a uniquely named database
+/// to guarantee isolation.
+/// </summary>
 public class RepositoryTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
 
+    /// <summary>
+    /// Initialises an <see cref="ApplicationDbContext"/> backed by a fresh in-memory database
+    /// for each test.
+    /// </summary>
     public RepositoryTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -19,10 +28,15 @@ public class RepositoryTests : IDisposable
         _context = new ApplicationDbContext(options);
     }
 
+    /// <summary>Disposes the database context after each test.</summary>
     public void Dispose() => _context.Dispose();
 
     // --- Generic Repository ---
 
+    /// <summary>
+    /// Verifies that <c>AddAsync</c> persists the entity so it can subsequently be
+    /// retrieved via <c>GetByIdAsync</c>.
+    /// </summary>
     [Fact]
     public async Task Repository_AddAsync_PersistsEntity()
     {
@@ -36,6 +50,9 @@ public class RepositoryTests : IDisposable
         fetched!.Name.Should().Be("test-host");
     }
 
+    /// <summary>
+    /// Verifies that <c>GetAllAsync</c> returns every entity that has been added to the store.
+    /// </summary>
     [Fact]
     public async Task Repository_GetAllAsync_ReturnsAllEntities()
     {
@@ -48,6 +65,10 @@ public class RepositoryTests : IDisposable
         all.Should().HaveCount(2);
     }
 
+    /// <summary>
+    /// Verifies that <c>GetByIdAsync</c> returns <c>null</c> when no entity with the
+    /// specified identifier exists.
+    /// </summary>
     [Fact]
     public async Task Repository_GetByIdAsync_UnknownId_ReturnsNull()
     {
@@ -58,6 +79,10 @@ public class RepositoryTests : IDisposable
         result.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that <c>UpdateAsync</c> persists property changes so they are visible
+    /// on the next <c>GetByIdAsync</c> call.
+    /// </summary>
     [Fact]
     public async Task Repository_UpdateAsync_ChangesAreSaved()
     {
@@ -72,6 +97,10 @@ public class RepositoryTests : IDisposable
         fetched!.Name.Should().Be("updated");
     }
 
+    /// <summary>
+    /// Verifies that <c>DeleteAsync</c> removes the entity so a subsequent
+    /// <c>GetByIdAsync</c> call returns <c>null</c>.
+    /// </summary>
     [Fact]
     public async Task Repository_DeleteAsync_RemovesEntity()
     {
@@ -85,6 +114,9 @@ public class RepositoryTests : IDisposable
         fetched.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that <c>FindAsync</c> returns only the entities that satisfy the given predicate.
+    /// </summary>
     [Fact]
     public async Task Repository_FindAsync_FiltersByPredicate()
     {
@@ -98,6 +130,10 @@ public class RepositoryTests : IDisposable
         result.First().Name.Should().Be("linux-host");
     }
 
+    /// <summary>
+    /// Verifies that <c>ExistsAsync</c> returns <c>true</c> when at least one entity
+    /// matches the supplied predicate.
+    /// </summary>
     [Fact]
     public async Task Repository_ExistsAsync_ReturnsTrueWhenEntityExists()
     {
@@ -110,6 +146,10 @@ public class RepositoryTests : IDisposable
         exists.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that <c>ExistsAsync</c> returns <c>false</c> when no entity matches
+    /// the supplied predicate.
+    /// </summary>
     [Fact]
     public async Task Repository_ExistsAsync_ReturnsFalseWhenEntityNotFound()
     {
@@ -122,6 +162,10 @@ public class RepositoryTests : IDisposable
 
     // --- AlertRepository ---
 
+    /// <summary>
+    /// Verifies that <c>GetOpenAlertsAsync</c> returns only alerts with
+    /// <see cref="AlertStatus.Open"/> status, excluding resolved or acknowledged ones.
+    /// </summary>
     [Fact]
     public async Task AlertRepository_GetOpenAlertsAsync_ReturnsOnlyOpenAlerts()
     {
@@ -136,6 +180,10 @@ public class RepositoryTests : IDisposable
         result.First().Status.Should().Be(AlertStatus.Open);
     }
 
+    /// <summary>
+    /// Verifies that <c>GetByHostIdAsync</c> returns only the alerts associated with
+    /// the specified host identifier.
+    /// </summary>
     [Fact]
     public async Task AlertRepository_GetByHostIdAsync_ReturnsAlertsForHost()
     {
@@ -150,6 +198,10 @@ public class RepositoryTests : IDisposable
         result.First().HostId.Should().Be(hostId);
     }
 
+    /// <summary>
+    /// Verifies that <c>GetBySeverityAsync</c> returns only the alerts matching the
+    /// requested <see cref="AlertSeverity"/>.
+    /// </summary>
     [Fact]
     public async Task AlertRepository_GetBySeverityAsync_FiltersBySeverity()
     {
@@ -166,6 +218,10 @@ public class RepositoryTests : IDisposable
 
     // --- MetricRepository ---
 
+    /// <summary>
+    /// Verifies that <c>GetByHostIdAsync</c> returns only metrics recorded for the
+    /// specified host identifier.
+    /// </summary>
     [Fact]
     public async Task MetricRepository_GetByHostIdAsync_ReturnsMetricsForHost()
     {
@@ -180,6 +236,10 @@ public class RepositoryTests : IDisposable
         result.First().HostId.Should().Be(hostId);
     }
 
+    /// <summary>
+    /// Verifies that <c>GetByTypeAndRangeAsync</c> returns only the metrics that match
+    /// the specified host, metric type, and fall within the given time range.
+    /// </summary>
     [Fact]
     public async Task MetricRepository_GetByTypeAndRangeAsync_FiltersCorrectly()
     {
@@ -198,6 +258,10 @@ public class RepositoryTests : IDisposable
 
     // --- HostRepository ---
 
+    /// <summary>
+    /// Verifies that <c>GetByNameAsync</c> returns the host whose <c>Name</c> matches
+    /// the supplied string.
+    /// </summary>
     [Fact]
     public async Task HostRepository_GetByNameAsync_ReturnsMatchingHost()
     {
@@ -210,6 +274,10 @@ public class RepositoryTests : IDisposable
         result!.Name.Should().Be("unique-host");
     }
 
+    /// <summary>
+    /// Verifies that <c>GetByNameAsync</c> returns <c>null</c> when no host with the
+    /// given name exists.
+    /// </summary>
     [Fact]
     public async Task HostRepository_GetByNameAsync_NotFound_ReturnsNull()
     {
@@ -220,6 +288,10 @@ public class RepositoryTests : IDisposable
         result.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies that <c>GetWithServiceNodesAsync</c> returns the host together with its
+    /// eagerly loaded <see cref="ServiceNode"/> navigation collection.
+    /// </summary>
     [Fact]
     public async Task HostRepository_GetWithServiceNodesAsync_IncludesServiceNodes()
     {
@@ -240,6 +312,10 @@ public class RepositoryTests : IDisposable
 
     // --- ServiceNodeRepository ---
 
+    /// <summary>
+    /// Verifies that <c>GetByHostIdAsync</c> returns only service nodes belonging to
+    /// the specified host identifier.
+    /// </summary>
     [Fact]
     public async Task ServiceNodeRepository_GetByHostIdAsync_ReturnsNodesForHost()
     {

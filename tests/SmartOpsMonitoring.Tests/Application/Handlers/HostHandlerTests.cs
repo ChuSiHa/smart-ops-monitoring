@@ -10,10 +10,16 @@ using Host = SmartOpsMonitoring.Domain.Entities.Host;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for host-related CQRS handlers:
+/// <see cref="CreateHostCommandHandler"/>, <see cref="GetHostsQueryHandler"/>,
+/// and <see cref="GetHostByIdQueryHandler"/>.
+/// </summary>
 public class HostHandlerTests
 {
     private readonly Mock<IHostRepository> _hostRepositoryMock = new();
 
+    /// <summary>Registers Mapster mappings required by the handlers under test.</summary>
     public HostHandlerTests()
     {
         MappingConfig.RegisterMappings();
@@ -21,6 +27,10 @@ public class HostHandlerTests
 
     // --- CreateHostCommandHandler ---
 
+    /// <summary>
+    /// Verifies that handling a valid create command persists the host to the repository
+    /// and returns a correctly mapped <see cref="Application.DTOs.HostDto"/>.
+    /// </summary>
     [Fact]
     public async Task CreateHostHandler_ValidCommand_AddsAndReturnsHostDto()
     {
@@ -44,6 +54,9 @@ public class HostHandlerTests
         _hostRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Host>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that a host can be created without providing an IP address.
+    /// </summary>
     [Fact]
     public async Task CreateHostHandler_WithoutIpAddress_ReturnsHostDto()
     {
@@ -57,6 +70,9 @@ public class HostHandlerTests
 
     // --- GetHostsQueryHandler ---
 
+    /// <summary>
+    /// Verifies that the handler returns all hosts from the repository mapped to DTOs.
+    /// </summary>
     [Fact]
     public async Task GetHostsHandler_ReturnsMappedHostDtos()
     {
@@ -74,6 +90,9 @@ public class HostHandlerTests
         result.Select(h => h.Name).Should().Contain(new[] { "host-a", "host-b" });
     }
 
+    /// <summary>
+    /// Verifies that when the repository contains no hosts, the handler returns an empty collection.
+    /// </summary>
     [Fact]
     public async Task GetHostsHandler_EmptyRepository_ReturnsEmpty()
     {
@@ -88,6 +107,10 @@ public class HostHandlerTests
 
     // --- GetHostByIdQueryHandler ---
 
+    /// <summary>
+    /// Verifies that when a host with the requested identifier exists, it is returned
+    /// as a correctly mapped DTO.
+    /// </summary>
     [Fact]
     public async Task GetHostByIdHandler_ExistingId_ReturnsMappedDto()
     {
@@ -103,6 +126,9 @@ public class HostHandlerTests
         result.Name.Should().Be("server-x");
     }
 
+    /// <summary>
+    /// Verifies that when no host matches the requested identifier, the handler returns <c>null</c>.
+    /// </summary>
     [Fact]
     public async Task GetHostByIdHandler_NonExistingId_ReturnsNull()
     {

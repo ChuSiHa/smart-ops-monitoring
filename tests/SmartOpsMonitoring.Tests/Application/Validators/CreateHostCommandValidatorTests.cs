@@ -3,10 +3,14 @@ using SmartOpsMonitoring.Application.Features.Hosts.Commands.CreateHost;
 
 namespace SmartOpsMonitoring.Tests.Application.Validators;
 
+/// <summary>
+/// Unit tests for <see cref="CreateHostCommandValidator"/>.
+/// </summary>
 public class CreateHostCommandValidatorTests
 {
     private readonly CreateHostCommandValidator _validator = new();
 
+    /// <summary>Returns a fully populated, valid <see cref="CreateHostCommand"/> for use as a baseline.</summary>
     private static CreateHostCommand ValidCommand() => new()
     {
         Name = "web-server-01",
@@ -14,6 +18,9 @@ public class CreateHostCommandValidatorTests
         IpAddress = "192.168.1.10"
     };
 
+    /// <summary>
+    /// Verifies that a fully populated, valid command passes all validation rules.
+    /// </summary>
     [Fact]
     public async Task Validate_ValidCommand_Passes()
     {
@@ -21,6 +28,9 @@ public class CreateHostCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>Name</c> produces a validation error on the <c>Name</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyName_Fails()
     {
@@ -31,6 +41,9 @@ public class CreateHostCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Name));
     }
 
+    /// <summary>
+    /// Verifies that a <c>Name</c> exceeding the 200-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_NameExceedsMaxLength_Fails()
     {
@@ -41,6 +54,9 @@ public class CreateHostCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.Name));
     }
 
+    /// <summary>
+    /// Verifies that an empty <c>OsType</c> produces a validation error on the <c>OsType</c> field.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyOsType_Fails()
     {
@@ -51,6 +67,9 @@ public class CreateHostCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.OsType));
     }
 
+    /// <summary>
+    /// Verifies that an <c>OsType</c> exceeding the 100-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_OsTypeExceedsMaxLength_Fails()
     {
@@ -61,6 +80,9 @@ public class CreateHostCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.OsType));
     }
 
+    /// <summary>
+    /// Verifies that a valid IPv4 or IPv6 address string passes validation.
+    /// </summary>
     [Theory]
     [InlineData("192.168.1.1")]
     [InlineData("10.0.0.1")]
@@ -73,6 +95,9 @@ public class CreateHostCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that a malformed IP address string fails validation on the <c>IpAddress</c> field.
+    /// </summary>
     [Theory]
     [InlineData("999.999.999.999")]
     [InlineData("not-an-ip")]
@@ -85,6 +110,9 @@ public class CreateHostCommandValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == nameof(cmd.IpAddress));
     }
 
+    /// <summary>
+    /// Verifies that omitting the optional <c>IpAddress</c> (empty string) does not affect validation.
+    /// </summary>
     [Fact]
     public async Task Validate_EmptyIpAddress_Passes()
     {
@@ -94,6 +122,9 @@ public class CreateHostCommandValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that an <c>IpAddress</c> exceeding the 45-character maximum fails validation.
+    /// </summary>
     [Fact]
     public async Task Validate_IpAddressExceedsMaxLength_Fails()
     {

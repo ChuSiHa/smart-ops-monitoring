@@ -4,8 +4,15 @@ using SmartOpsMonitoring.Domain.Events;
 
 namespace SmartOpsMonitoring.Tests.Domain;
 
+/// <summary>
+/// Unit tests for domain events: <see cref="AlertCreatedEvent"/> and <see cref="MetricReceivedEvent"/>.
+/// </summary>
 public class DomainEventTests
 {
+    /// <summary>
+    /// Verifies that the <see cref="AlertCreatedEvent"/> constructor correctly stores
+    /// the alert identifier, severity, and host identifier.
+    /// </summary>
     [Fact]
     public void AlertCreatedEvent_Constructor_SetsProperties()
     {
@@ -20,6 +27,10 @@ public class DomainEventTests
         evt.HostId.Should().Be(hostId);
     }
 
+    /// <summary>
+    /// Verifies that all <see cref="AlertSeverity"/> values are accepted by the
+    /// <see cref="AlertCreatedEvent"/> constructor without throwing.
+    /// </summary>
     [Theory]
     [InlineData(AlertSeverity.Info)]
     [InlineData(AlertSeverity.Warning)]
@@ -31,6 +42,10 @@ public class DomainEventTests
         evt.Severity.Should().Be(severity);
     }
 
+    /// <summary>
+    /// Verifies that the <see cref="MetricReceivedEvent"/> constructor correctly stores
+    /// the metric identifier, host identifier, metric type, and numeric value.
+    /// </summary>
     [Fact]
     public void MetricReceivedEvent_Constructor_SetsProperties()
     {
@@ -47,6 +62,9 @@ public class DomainEventTests
         evt.Value.Should().Be(value);
     }
 
+    /// <summary>
+    /// Verifies that a negative metric value is accepted by the <see cref="MetricReceivedEvent"/> constructor.
+    /// </summary>
     [Fact]
     public void MetricReceivedEvent_NegativeValue_IsAllowed()
     {
@@ -55,6 +73,9 @@ public class DomainEventTests
         evt.Value.Should().Be(-10.5);
     }
 
+    /// <summary>
+    /// Verifies that a zero metric value is accepted by the <see cref="MetricReceivedEvent"/> constructor.
+    /// </summary>
     [Fact]
     public void MetricReceivedEvent_ZeroValue_IsAllowed()
     {

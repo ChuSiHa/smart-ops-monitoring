@@ -9,10 +9,15 @@ using SmartOpsMonitoring.Domain.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for service-node-related CQRS handlers:
+/// <see cref="CreateServiceNodeCommandHandler"/> and <see cref="GetServiceNodesByHostQueryHandler"/>.
+/// </summary>
 public class ServiceNodeHandlerTests
 {
     private readonly Mock<IServiceNodeRepository> _serviceNodeRepositoryMock = new();
 
+    /// <summary>Registers Mapster mappings required by the handlers under test.</summary>
     public ServiceNodeHandlerTests()
     {
         MappingConfig.RegisterMappings();
@@ -20,6 +25,10 @@ public class ServiceNodeHandlerTests
 
     // --- CreateServiceNodeCommandHandler ---
 
+    /// <summary>
+    /// Verifies that handling a valid create command persists the service node to the repository
+    /// and returns a correctly mapped <see cref="Application.DTOs.ServiceNodeDto"/>.
+    /// </summary>
     [Fact]
     public async Task CreateServiceNodeHandler_ValidCommand_AddsAndReturnsDto()
     {
@@ -46,6 +55,9 @@ public class ServiceNodeHandlerTests
             r => r.AddAsync(It.IsAny<ServiceNode>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that when no port is provided the returned DTO has a null <c>Port</c>.
+    /// </summary>
     [Fact]
     public async Task CreateServiceNodeHandler_WithoutPort_PortIsNull()
     {
@@ -65,6 +77,9 @@ public class ServiceNodeHandlerTests
 
     // --- GetServiceNodesByHostQueryHandler ---
 
+    /// <summary>
+    /// Verifies that the handler returns all service nodes for the specified host, mapped to DTOs.
+    /// </summary>
     [Fact]
     public async Task GetServiceNodesByHostHandler_ExistingHost_ReturnsNodes()
     {
@@ -84,6 +99,9 @@ public class ServiceNodeHandlerTests
         result.Select(n => n.Name).Should().Contain(new[] { "api", "db" });
     }
 
+    /// <summary>
+    /// Verifies that when a host has no service nodes, the handler returns an empty collection.
+    /// </summary>
     [Fact]
     public async Task GetServiceNodesByHostHandler_NoNodes_ReturnsEmpty()
     {

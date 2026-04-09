@@ -9,11 +9,16 @@ using SmartOpsMonitoring.Domain.Repositories;
 
 namespace SmartOpsMonitoring.Tests.Application.Handlers;
 
+/// <summary>
+/// Unit tests for metric-related CQRS handlers:
+/// <see cref="IngestMetricCommandHandler"/> and <see cref="GetMetricsByHostQueryHandler"/>.
+/// </summary>
 public class MetricHandlerTests
 {
     private readonly Mock<IMetricRepository> _metricRepositoryMock = new();
     private readonly Mock<MediatR.IPublisher> _publisherMock = new();
 
+    /// <summary>Registers Mapster mappings required by the handlers under test.</summary>
     public MetricHandlerTests()
     {
         MappingConfig.RegisterMappings();
@@ -21,6 +26,10 @@ public class MetricHandlerTests
 
     // --- IngestMetricCommandHandler ---
 
+    /// <summary>
+    /// Verifies that a valid ingest command persists the metric to the repository
+    /// and publishes a <see cref="MetricReceivedEvent"/> with the correct host and metric type.
+    /// </summary>
     [Fact]
     public async Task IngestMetricHandler_ValidCommand_AddsMetricAndPublishesEvent()
     {
@@ -48,6 +57,10 @@ public class MetricHandlerTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that a custom <c>Timestamp</c> supplied on the command is preserved
+    /// on the persisted metric.
+    /// </summary>
     [Fact]
     public async Task IngestMetricHandler_WithTimestamp_PreservesTimestamp()
     {
@@ -67,6 +80,10 @@ public class MetricHandlerTests
         result.Timestamp.Should().Be(customTimestamp);
     }
 
+    /// <summary>
+    /// Verifies that when no <c>Timestamp</c> is provided on the command, the handler
+    /// defaults it to the current UTC time.
+    /// </summary>
     [Fact]
     public async Task IngestMetricHandler_WithoutTimestamp_DefaultsToUtcNow()
     {
@@ -86,6 +103,10 @@ public class MetricHandlerTests
         result.Timestamp.Should().BeAfter(before).And.BeBefore(DateTime.UtcNow.AddSeconds(1));
     }
 
+    /// <summary>
+    /// Verifies that key-value labels supplied on the ingest command are correctly
+    /// propagated to the returned metric DTO.
+    /// </summary>
     [Fact]
     public async Task IngestMetricHandler_WithLabels_PreservesLabels()
     {
@@ -107,6 +128,10 @@ public class MetricHandlerTests
 
     // --- GetMetricsByHostQueryHandler ---
 
+    /// <summary>
+    /// Verifies that when no metric type or time range is specified, the handler calls
+    /// <c>GetByHostIdAsync</c> for the requested host.
+    /// </summary>
     [Fact]
     public async Task GetMetricsByHostHandler_NoTypeOrRange_CallsGetByHostId()
     {
@@ -125,6 +150,10 @@ public class MetricHandlerTests
         _metricRepositoryMock.Verify(r => r.GetByHostIdAsync(hostId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that providing a metric type together with both time-range bounds routes
+    /// the query to <c>GetByTypeAndRangeAsync</c> for efficient database-side filtering.
+    /// </summary>
     [Fact]
     public async Task GetMetricsByHostHandler_WithTypeAndRange_CallsGetByTypeAndRange()
     {
@@ -152,6 +181,10 @@ public class MetricHandlerTests
             r => r.GetByTypeAndRangeAsync(hostId, "cpu_usage", from, to, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifies that providing a metric type without a time range falls back to
+    /// <c>GetByHostIdAsync</c> rather than the type-and-range overload.
+    /// </summary>
     [Fact]
     public async Task GetMetricsByHostHandler_TypeWithoutRange_FallsBackToGetByHostId()
     {

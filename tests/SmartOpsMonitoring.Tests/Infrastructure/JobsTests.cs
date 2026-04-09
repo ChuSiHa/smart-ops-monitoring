@@ -5,10 +5,19 @@ using SmartOpsMonitoring.Infrastructure.Jobs;
 
 namespace SmartOpsMonitoring.Tests.Infrastructure;
 
+/// <summary>
+/// Unit tests for Hangfire background jobs:
+/// <see cref="HealthCheckPollingJob"/>, <see cref="MetricAggregationJob"/>,
+/// and <see cref="StaleAlertCleanupJob"/>.
+/// </summary>
 public class JobsTests
 {
     // --- HealthCheckPollingJob ---
 
+    /// <summary>
+    /// Verifies that <see cref="HealthCheckPollingJob.ExecuteAsync"/> completes successfully
+    /// without throwing any exceptions.
+    /// </summary>
     [Fact]
     public async Task HealthCheckPollingJob_Execute_CompletesWithoutError()
     {
@@ -20,6 +29,10 @@ public class JobsTests
         await act.Should().NotThrowAsync();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="HealthCheckPollingJob.ExecuteAsync"/> logs at least one
+    /// <see cref="LogLevel.Information"/> message when it executes.
+    /// </summary>
     [Fact]
     public async Task HealthCheckPollingJob_Execute_LogsInformation()
     {
@@ -40,6 +53,10 @@ public class JobsTests
 
     // --- MetricAggregationJob ---
 
+    /// <summary>
+    /// Verifies that <see cref="MetricAggregationJob.ExecuteAsync"/> completes successfully
+    /// without throwing any exceptions.
+    /// </summary>
     [Fact]
     public async Task MetricAggregationJob_Execute_CompletesWithoutError()
     {
@@ -51,6 +68,10 @@ public class JobsTests
         await act.Should().NotThrowAsync();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="MetricAggregationJob.ExecuteAsync"/> logs at least one
+    /// <see cref="LogLevel.Information"/> message when it executes.
+    /// </summary>
     [Fact]
     public async Task MetricAggregationJob_Execute_LogsInformation()
     {
@@ -71,6 +92,10 @@ public class JobsTests
 
     // --- StaleAlertCleanupJob ---
 
+    /// <summary>
+    /// Verifies that <see cref="StaleAlertCleanupJob.ExecuteAsync"/> completes successfully
+    /// without throwing any exceptions.
+    /// </summary>
     [Fact]
     public async Task StaleAlertCleanupJob_Execute_CompletesWithoutError()
     {
@@ -82,6 +107,10 @@ public class JobsTests
         await act.Should().NotThrowAsync();
     }
 
+    /// <summary>
+    /// Verifies that <see cref="StaleAlertCleanupJob.ExecuteAsync"/> logs at least one
+    /// <see cref="LogLevel.Information"/> message when it executes.
+    /// </summary>
     [Fact]
     public async Task StaleAlertCleanupJob_Execute_LogsInformation()
     {
