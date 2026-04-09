@@ -77,27 +77,31 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
             throw new UnauthorizedAccessException("Invalid credentials.");
 
-        return BuildJwtToken(user);
+        return await BuildJwtTokenAsync(user);
     }
 
     /// <summary>
     /// Builds a signed JWT bearer token for the specified user using configuration settings.
+    /// Role claims are resolved from ASP.NET Identity and embedded in the token.
     /// </summary>
     /// <param name="user">The authenticated user for whom the token is generated.</param>
     /// <returns>A <see cref="LoginResultDto"/> containing the signed token and its UTC expiry time.</returns>
-    private LoginResultDto BuildJwtToken(ApplicationUser user)
+    private async Task<LoginResultDto> BuildJwtTokenAsync(ApplicationUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiry = DateTime.UtcNow.AddHours(double.Parse(_configuration["Jwt:ExpiryHours"] ?? "24"));
 
-        var claims = new[]
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Name, user.Email!)
         };
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
