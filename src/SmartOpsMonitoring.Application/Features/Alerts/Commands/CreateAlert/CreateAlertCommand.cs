@@ -20,5 +20,5 @@ public class CreateAlertCommand : ICommand<AlertDto>
     public string Message { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the severity as a string (e.g., "Info", "Warning", "Critical").</summary>
-    public string Severity { get; set; } = string.Empty;
+    public AlertSeverity Severity { get; set; }
 }

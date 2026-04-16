@@ -13,10 +13,6 @@ public class UpdateAlertStatusCommandValidator : AbstractValidator<UpdateAlertSt
     public UpdateAlertStatusCommandValidator()
     {
         RuleFor(x => x.AlertId).NotEmpty().WithMessage(AlertIdRequiredMessage);
-        RuleFor(x => x.Status)
-            .NotEmpty()
-            .MaximumLength(StatusMaxLength)
-            .Must(s => Enum.TryParse<AlertStatus>(s, true, out _))
-            .WithMessage(StatusInvalidMessage);
+        RuleFor(x => x.Status).IsInEnum();
     }
 }

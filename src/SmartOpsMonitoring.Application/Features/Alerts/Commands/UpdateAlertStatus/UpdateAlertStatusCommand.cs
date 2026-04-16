@@ -11,7 +11,7 @@ public class UpdateAlertStatusCommand : ICommand<AlertDto>
     public Guid AlertId { get; set; }
 
     /// <summary>Gets or sets the new status string (e.g., "Acknowledged", "Resolved").</summary>
-    public string Status { get; set; } = string.Empty;
+    public AlertStatus Status { get; set; } 
 
     /// <summary>Gets or sets the identifier of the user performing the update, if applicable.</summary>
     public string? UserId { get; set; }

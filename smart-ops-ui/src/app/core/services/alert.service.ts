@@ -5,7 +5,7 @@ import { AlertDto, CreateAlertCommand, UpdateAlertStatusCommand, GetAlertsParams
 
 @Injectable({ providedIn: 'root' })
 export class AlertService {
-  private readonly base = '/api/alerts';
+  private readonly base = 'api/alerts';
 
   constructor(private http: HttpClient) {}
 

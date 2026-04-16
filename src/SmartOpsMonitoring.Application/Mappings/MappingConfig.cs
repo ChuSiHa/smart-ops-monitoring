@@ -19,7 +19,6 @@ public static class MappingConfig
         // Status defaults to Open when a new alert is created.
         TypeAdapterConfig<Features.Alerts.Commands.CreateAlert.CreateAlertCommand, Alert>
             .NewConfig()
-            .Map(dest => dest.Severity, src => Enum.Parse<AlertSeverity>(src.Severity, true))
             .Map(dest => dest.Status, src => AlertStatus.Open);
 
         // IngestMetricCommand → Metric

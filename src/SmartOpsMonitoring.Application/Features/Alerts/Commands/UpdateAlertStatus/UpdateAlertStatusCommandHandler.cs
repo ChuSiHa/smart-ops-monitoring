@@ -28,16 +28,15 @@ public class UpdateAlertStatusCommandHandler : ICommandHandler<UpdateAlertStatus
         var alert = await _alertRepository.GetByIdAsync(request.AlertId, cancellationToken)
             ?? throw new KeyNotFoundException($"Alert {request.AlertId} not found.");
 
-        var newStatus = Enum.Parse<AlertStatus>(request.Status, true);
-        alert.Status = newStatus;
+        alert.Status = request.Status;
         alert.UpdatedAt = DateTime.UtcNow;
 
-        if (newStatus == AlertStatus.Acknowledged)
+        if (request.Status == AlertStatus.Acknowledged)
         {
             alert.AcknowledgedAt = DateTime.UtcNow;
             alert.AcknowledgedByUserId = request.UserId;
         }
-        else if (newStatus == AlertStatus.Resolved)
+        else if (request.Status == AlertStatus.Resolved)
         {
             alert.ResolvedAt = DateTime.UtcNow;
         }

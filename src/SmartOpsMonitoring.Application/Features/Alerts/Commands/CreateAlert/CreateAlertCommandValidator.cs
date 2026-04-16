@@ -16,9 +16,6 @@ public class CreateAlertCommandValidator : AbstractValidator<CreateAlertCommand>
         RuleFor(x => x.HostId).NotEmpty().WithMessage(HostIdRequiredMessage);
         RuleFor(x => x.Title).NotEmpty().MaximumLength(TitleMaxLength);
         RuleFor(x => x.Message).NotEmpty().MaximumLength(MessageMaxLength);
-        RuleFor(x => x.Severity)
-            .NotEmpty()
-            .Must(s => Enum.TryParse<AlertSeverity>(s, true, out _))
-            .WithMessage(SeverityInvalidMessage);
+        RuleFor(x => x.Severity).IsInEnum();
     }
 }
