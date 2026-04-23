@@ -56,7 +56,7 @@ Edit `.env` and replace every placeholder value, especially:
 | `JWT_KEY` | Random string ≥ 32 characters — e.g. `openssl rand -base64 32` |
 | `ELASTIC_PASSWORD` | `elastic` superuser password |
 | `KIBANA_SYSTEM_PASSWORD` | `kibana_system` user password |
-| `KIBANA_ENCRYPTION_KEY` | Random hex string ≥ 32 chars — e.g. `openssl rand -hex 16` |
+| `KIBANA_ENCRYPTION_KEY` | Random hex string ≥ 32 chars — e.g. `openssl rand -hex 32` |
 
 #### 2. Raise the host `vm.max_map_count` (Linux only)
 
