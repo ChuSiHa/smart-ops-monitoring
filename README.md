@@ -35,11 +35,85 @@ Api → Application
 
 ## Getting started
 
-### Prerequisites
+### Option A — Docker Compose (recommended)
+
+Runs the entire stack (PostgreSQL × 2, Redis, Elasticsearch, Kibana, API) with a single command.
+
+#### Prerequisites
+- [Docker Desktop](https://docs.docker.com/get-docker/) ≥ 24 (includes Compose v2)
+
+#### 1. Create your `.env` file
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and replace every placeholder value, especially:
+
+| Variable | Description |
+|---|---|
+| `POSTGRES_PASSWORD` | PostgreSQL password |
+| `JWT_KEY` | Random string ≥ 32 characters — e.g. `openssl rand -base64 32` |
+| `ELASTIC_PASSWORD` | `elastic` superuser password |
+| `KIBANA_SYSTEM_PASSWORD` | `kibana_system` user password |
+| `KIBANA_ENCRYPTION_KEY` | Random hex string ≥ 32 chars — e.g. `openssl rand -hex 16` |
+
+#### 2. Raise the host `vm.max_map_count` (Linux only)
+
+Elasticsearch requires a higher virtual-memory limit on Linux hosts:
+
+```bash
+sudo sysctl -w vm.max_map_count=262144
+# Persist across reboots:
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+```
+
+On macOS and Windows (Docker Desktop) this is handled automatically inside the VM.
+
+#### 3. Start the stack
+
+```bash
+docker compose up -d
+```
+
+Startup order is managed automatically:
+1. PostgreSQL & Redis become healthy.
+2. Elasticsearch becomes healthy.
+3. `elasticsearch-setup` (one-shot) sets the `kibana_system` password.
+4. Kibana starts and connects to Elasticsearch.
+5. API starts and auto-migrates the database.
+
+#### 4. Verify
+
+| Service | URL | Credentials |
+|---|---|---|
+| API / Swagger | http://localhost:8080/swagger | — |
+| Hangfire | http://localhost:8080/hangfire | app user (JWT) |
+| Elasticsearch | http://localhost:9200 | `elastic` / `$ELASTIC_PASSWORD` |
+| Kibana | http://localhost:5601 | `elastic` / `$ELASTIC_PASSWORD` |
+
+Check container health:
+
+```bash
+docker compose ps
+```
+
+#### 5. Stop
+
+```bash
+docker compose down          # keep volumes
+docker compose down -v       # remove volumes (destroys all data)
+```
+
+---
+
+### Option B — Local development (without Docker)
+
+#### Prerequisites
 - .NET 8 SDK
 - PostgreSQL (or Docker)
 
-### 1. Configure secrets
+#### 1. Configure secrets
 
 `Jwt:Key` must be supplied via environment variable or .NET User Secrets — it is **not** in source:
 
@@ -52,7 +126,7 @@ dotnet user-secrets set "Jwt:Key" "your-256-bit-secret" \
 export Jwt__Key="your-256-bit-secret"
 ```
 
-### 2. Set connection strings
+#### 2. Set connection strings
 
 Update `src/SmartOpsMonitoring.Api/appsettings.Development.json`:
 ```json
@@ -63,14 +137,14 @@ Update `src/SmartOpsMonitoring.Api/appsettings.Development.json`:
 }
 ```
 
-### 3. Run migrations
+#### 3. Run migrations
 
 ```bash
 cd src/SmartOpsMonitoring.Api
 dotnet ef database update --project ../SmartOpsMonitoring.Infrastructure
 ```
 
-### 4. Run the API
+#### 4. Run the API
 
 ```bash
 dotnet run --project src/SmartOpsMonitoring.Api
@@ -112,73 +186,3 @@ Clients join named groups per host: `JoinHostGroup(hostId)`. The infrastructure 
 | Stale alert cleanup | Every hour |
 | Health-check polling | Every minute |
 
-
-ASP.NET Core 8 Clean Architecture Web API for the Smart Operations Monitoring platform.
-
-## Tech stack
-
-- **.NET 8** / ASP.NET Core Web API (Clean Architecture — Domain, Application, Infrastructure, Api)
-- **Entity Framework Core 8** + **PostgreSQL** (via Npgsql)
-- **MediatR 12** — CQRS command/query pipeline
-- **FluentValidation 11** — request validation
-- **Hangfire 1.8** — background/recurring jobs (PostgreSQL storage)
-- **SignalR** — real-time metric & alert streaming
-- **Serilog 8** — structured logging
-- **JWT Bearer** authentication with ASP.NET Core Identity
-- **Swashbuckle / Swagger UI** with Bearer token support
-
-## Getting started
-
-### 1. Configure secrets
-
-**Never commit real secrets.** The `appsettings.json` file ships with placeholder values. Override them before running in any non-local environment:
-
-```bash
-# Via environment variable (recommended)
-export Jwt__Key="your-256-bit-secret-key-here"
-export ConnectionStrings__DefaultConnection="Host=...;Database=smartops;Username=...;Password=..."
-
-# Or via .NET User Secrets (development only)
-dotnet user-secrets set "Jwt:Key" "your-256-bit-secret-key-here" \
-  --project src/SmartOpsMonitoring.Api
-```
-
-For production, use a secrets manager (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault) and inject via environment variables or a configuration provider.
-
-### 2. Run the API
-
-```bash
-cd src/SmartOpsMonitoring.Api
-dotnet run
-```
-
-The PostgreSQL database is migrated automatically on first startup.
-
-Swagger UI is available at: `https://localhost:{port}/swagger`
-
-## API overview
-
-| Controller     | Base route               | Auth required | Description                        |
-|----------------|--------------------------|---------------|------------------------------------|
-| Auth           | `/api/auth`              | Public        | Register & login (returns JWT)     |
-| Hosts          | `/api/hosts`             | Authenticated | Host CRUD                          |
-| ServiceNodes   | `/api/servicenodes`      | Authenticated | Service node management            |
-| Metrics        | `/api/metrics`           | Authenticated | Ingest & query telemetry metrics   |
-| Alerts         | `/api/alerts`            | Authenticated | Alert lifecycle management         |
-
-## Real-time hubs
-
-| Hub        | Path               | Description                        |
-|------------|--------------------|------------------------------------|
-| MetricHub  | `/hubs/metrics`    | Stream live metric data per host   |
-| AlertHub   | `/hubs/alerts`     | Stream live alert notifications    |
-
-## Project structure
-
-```
-src/
-├── SmartOpsMonitoring.Domain/          # Entities, enums, value objects, events, repository interfaces
-├── SmartOpsMonitoring.Application/     # CQRS commands/queries, DTOs, validators, DI registration
-├── SmartOpsMonitoring.Infrastructure/  # EF Core, Identity, repositories, hubs, Hangfire jobs
-└── SmartOpsMonitoring.Api/             # Controllers, middleware, Program.cs
-```
